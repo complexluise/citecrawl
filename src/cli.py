@@ -143,9 +143,10 @@ def enrich(input_dir: str):
 
 @cli.command()
 @click.option('--input-dir', default='output', help='The directory containing the enriched_metadata.csv file.')
-def cite(input_dir: str):
+@click.option('--doc-id', default=None, help='The Google Doc ID to update with the new citations.')
+def cite(input_dir: str, doc_id: str):
     """
-    Generates a bibliography.bib file from the enriched metadata.
+    Generates a bibliography.bib file and optionally updates a Google Doc.
     """
     enriched_csv_path = os.path.join(input_dir, "enriched_metadata.csv")
     if not os.path.exists(enriched_csv_path):
@@ -175,6 +176,19 @@ def cite(input_dir: str):
         f.write(bibtex_content)
 
     click.echo(f"Bibliography generated at {bib_output_path}")
+
+    # If a Google Doc ID is provided, update the doc
+    if doc_id:
+        click.echo("Updating citations in Google Doc...")
+        try:
+            # Dynamic import to avoid issues when bibtex2docs is not installed
+            from src.gdocs import update_google_doc
+            update_google_doc(doc_id, bibtex_content)
+            click.echo("Google Doc update complete.")
+        except ImportError:
+            click.echo("Error: 'bibtex2docs' is not installed. Please install it to use the Google Docs integration.", err=True)
+        except Exception as e:
+            click.echo(f"Error updating Google Doc: {e}", err=True)
 
 if __name__ == '__main__':
     cli()

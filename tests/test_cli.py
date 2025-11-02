@@ -174,3 +174,42 @@ def test_cite_command_e2e():
     shutil.rmtree(test_dir)
     if os.path.exists(bib_output_path):
         os.remove(bib_output_path)
+
+def test_cite_command_with_google_docs_integration(mocker):
+    """
+    Tests that the 'cite' command calls the Google Docs update function
+    when a document ID is provided.
+    """
+    # Arrange
+    test_dir = "test_gdocs_cli"
+    os.makedirs(test_dir, exist_ok=True)
+    enriched_csv_path = os.path.join(test_dir, "enriched_metadata.csv")
+    doc_id = "fake_doc_id"
+
+    with open(enriched_csv_path, "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(["url", "summary", "bib_title", "bib_author", "bib_year"])
+        writer.writerow(["https://example.com", "S", "T", "A", "2023"])
+
+    runner = CliRunner()
+    # Patch the function in the module where it is defined
+    mock_gdocs_update = mocker.patch('src.gdocs.update_google_doc')
+
+    # Act
+    result = runner.invoke(cite, ["--input-dir", test_dir, "--doc-id", doc_id])
+
+    # Assert
+    assert result.exit_code == 0
+    assert "Updating citations in Google Doc..." in result.output
+    mock_gdocs_update.assert_called_once()
+    
+    # Verify the bibtex content passed to the mock
+    args, _ = mock_gdocs_update.call_args
+    assert args[0] == doc_id
+    assert "@misc{A2023T," in args[1]
+    assert "title      = {T}" in args[1]
+
+    # Teardown
+    shutil.rmtree(test_dir)
+    if os.path.exists("bibliography.bib"):
+        os.remove("bibliography.bib")
