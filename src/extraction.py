@@ -1,18 +1,33 @@
 from firecrawl import FirecrawlApp
 from src.models import ScrapedData
+import pandas as pd
 
-def scrape_url(url: str, api_key: str) -> ScrapedData:
+def load_urls_from_csv(csv_path: str) -> list[dict]:
     """
-    Scrapes a single URL using the FirecrawlApp and returns the
+    Loads URLs from a CSV file.
+
+    Args:
+        csv_path: The path to the CSV file.
+
+    Returns:
+        A list of dictionaries, where each dictionary represents a row in the CSV file.
+    """
+    df = pd.read_csv(csv_path)
+    return df.to_dict('records')
+
+def scrape_url(row: dict, api_key: str) -> ScrapedData:
+    """
+    Scrapes a single URL from a dictionary row using the FirecrawlApp and returns the
     content and metadata wrapped in a ScrapedData object.
 
     Args:
-        url: The URL to scrape.
+        row: A dictionary representing a row from the CSV file.
         api_key: The API key for the Firecrawl service.
 
     Returns:
         A ScrapedData object containing the scraped information.
     """
+    url = row['Enlace/URL']
     try:
         app = FirecrawlApp(api_key=api_key)
         scraped_result = app.scrape(url=url)

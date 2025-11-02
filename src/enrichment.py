@@ -1,19 +1,18 @@
 import json
 import google.generativeai as genai
-from src.models import ScrapedData, EnrichedData
 
-def enrich_content(scraped_data: ScrapedData, user_prompt: str, api_key: str) -> EnrichedData:
+def enrich_content(row: dict, scraped_content: str, api_key: str) -> dict:
     """
     Enriches the scraped content by generating a summary and extracting
     bibliographic metadata using the Gemini API.
 
     Args:
-        scraped_data: The data scraped from a URL.
-        user_prompt: The user's question to be answered by the summary.
+        row: A dictionary representing a row from the CSV file.
+        scraped_content: The content scraped from the URL.
         api_key: The API key for the Gemini service.
 
     Returns:
-        An EnrichedData object containing the summary and bibliography.
+        An updated dictionary with the enriched data.
     """
     genai.configure(api_key=api_key)
     model = genai.GenerativeModel('gemini-pro')
@@ -21,22 +20,18 @@ def enrich_content(scraped_data: ScrapedData, user_prompt: str, api_key: str) ->
     system_prompt = f"""
     You are a research assistant. Your task is to analyze the provided web page content
     and generate two pieces of information:
-    1. A concise summary that directly answers the user's question: "{user_prompt}"
-    2. Bibliographic metadata for citation purposes (Title, Author, Year).
+    1. A concise summary.
+    2. The title of the page.
 
     Analyze the following content:
     ---
-    {scraped_data.content}
+    {scraped_content}
     ---
 
     Based on the content, please output a JSON object with the following structure:
     {{
-        "summary": "Your concise summary here.",
-        "bibliography": {{
-            "title": "Extracted Title",
-            "author": "Extracted Author(s)",
-            "year": YYYY
-        }}
+        "Resumen Principal": "Your concise summary here.",
+        "Título": "Extracted Title"
     }}
     """
 
@@ -47,10 +42,11 @@ def enrich_content(scraped_data: ScrapedData, user_prompt: str, api_key: str) ->
     
     try:
         enriched_json = json.loads(cleaned_response_text)
-        return EnrichedData.model_validate(enriched_json)
+        row.update(enriched_json)
+        row['Extracted'] = True
+        return row
     except (json.JSONDecodeError, TypeError) as e:
         # Handle cases where the model's output is not valid JSON
         print(f"Error decoding JSON from model response: {e}")
-        # Return a default or empty object to avoid crashing
-        return EnrichedData(summary="Failed to parse AI response.", bibliography={})
-
+        # Return the original row to avoid crashing
+        return row
