@@ -1,0 +1,7 @@
+rich
+logging
+click
+pandas
+firecrawl-py
+python-dotenv
+bib2docs
