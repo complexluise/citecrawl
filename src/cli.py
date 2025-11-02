@@ -4,7 +4,8 @@ import os
 from urllib.parse import urlparse
 from src.extraction import scrape_url
 from src.enrichment import enrich_content
-from src.models import ScrapedData
+from src.bibtex import generate_bibliography_file
+from src.models import ScrapedData, Publication
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -139,6 +140,41 @@ def enrich(input_dir: str):
         click.echo(f"Enriched metadata saved to {enriched_csv_path}")
 
     click.echo("Enrichment complete.")
+
+@cli.command()
+@click.option('--input-dir', default='output', help='The directory containing the enriched_metadata.csv file.')
+def cite(input_dir: str):
+    """
+    Generates a bibliography.bib file from the enriched metadata.
+    """
+    enriched_csv_path = os.path.join(input_dir, "enriched_metadata.csv")
+    if not os.path.exists(enriched_csv_path):
+        click.echo(f"Error: enriched_metadata.csv not found in {input_dir}", err=True)
+        return
+
+    click.echo("Generating bibliography.bib...")
+    df = pd.read_csv(enriched_csv_path)
+    
+    # Convert dataframe rows to Publication objects
+    publications = [
+        Publication(
+            title=row['bib_title'],
+            author=row['bib_author'],
+            year=int(row['bib_year']) if pd.notna(row['bib_year']) else None,
+            url=row['url']
+        )
+        for index, row in df.iterrows()
+    ]
+
+    # Generate the .bib file content
+    bibtex_content = generate_bibliography_file(publications)
+
+    # Write to bibliography.bib
+    bib_output_path = "bibliography.bib"
+    with open(bib_output_path, "w", encoding="utf-8") as f:
+        f.write(bibtex_content)
+
+    click.echo(f"Bibliography generated at {bib_output_path}")
 
 if __name__ == '__main__':
     cli()

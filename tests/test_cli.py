@@ -2,7 +2,7 @@ import os
 import shutil
 import csv
 from click.testing import CliRunner
-from src.cli import extract, enrich
+from src.cli import extract, enrich, cite
 from src.models import ScrapedData, EnrichedData, Bibliography
 from unittest.mock import patch
 
@@ -128,3 +128,49 @@ def test_enrich_command_e2e():
 
     # Teardown
     shutil.rmtree(test_dir)
+
+def test_cite_command_e2e():
+    """
+    End-to-end test for the 'cite' command.
+    It checks if the command correctly generates a bibliography.bib file.
+    """
+    # Arrange: Create a temporary directory and a dummy enriched_metadata.csv
+    test_dir = "test_cite_cli"
+    os.makedirs(test_dir, exist_ok=True)
+    enriched_csv_path = os.path.join(test_dir, "enriched_metadata.csv")
+    bib_output_path = "bibliography.bib"
+
+    # Create dummy enriched_metadata.csv
+    with open(enriched_csv_path, "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(["url", "summary", "bib_title", "bib_author", "bib_year"])
+        writer.writerow(["https://example.com", "Summary 1", "Title 1", "Author 1", "2023"])
+        writer.writerow(["https://example.org", "Summary 2", "Title 2", "Author 2", "2024"])
+
+    runner = CliRunner()
+
+    # Act: Run the 'cite' command
+    result = runner.invoke(cite, ["--input-dir", test_dir])
+
+    # Assert: Check command execution and output file
+    assert result.exit_code == 0
+    assert "Generating bibliography.bib..." in result.output
+    assert "Bibliography generated at" in result.output
+    assert os.path.exists(bib_output_path)
+
+    # Assert: Check the content of the generated .bib file
+    with open(bib_output_path, "r") as f:
+        content = f.read()
+        assert "@misc{12023Title," in content
+        assert "  title      = {Title 1}" in content
+        assert "  author     = {Author 1}" in content
+        assert "  year       = {2023}" in content
+        assert "@misc{22024Title," in content
+        assert "  title      = {Title 2}" in content
+        assert "  author     = {Author 2}" in content
+        assert "  year       = {2024}" in content
+
+    # Teardown
+    shutil.rmtree(test_dir)
+    if os.path.exists(bib_output_path):
+        os.remove(bib_output_path)
