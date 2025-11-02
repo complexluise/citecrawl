@@ -4,7 +4,7 @@ This project is a Python-based tool for scraping web pages, extracting bibliogra
 
 # Development Approach: Test-Driven Development (TDD)
 
-This project follows a strict TDD methodology. The development process is based on the user stories outlined in the `PRD.md` file. For each feature, a failing unit test will be created first, and then the implementation code will be written to make the test pass. The previous code has been moved to the `old/` directory and will be used for reference only.
+This project follows a strict TDD methodology using the `pytest` framework. The development process is based on the user stories outlined in the `PRD.md` file. For each feature, a failing unit test will be created first, and then the implementation code will be written to make the test pass. The previous code has been moved to the `old/` directory and will be used for reference only.
 
 # Building and Running
 
@@ -62,6 +62,14 @@ Use `uv run` to execute the pipeline commands within the project's virtual envir
     ```
     This command generates a `bibliography.bib` file and updates the citations in the specified Google Doc.
 
+# Testing
+
+To run the test suite, use the following command:
+
+```bash
+uv run pytest
+```
+
 # Development Conventions
 
 - The project uses the `click` library for creating command-line interfaces.
@@ -71,3 +79,31 @@ Use `uv run` to execute the pipeline commands within the project's virtual envir
 - The `firecrawl` library is used for web scraping.
 - The `google-generativeai` library is for content enrichment.
 - The `bibtex2docs` library is used for updating citations in Google Docs.
+
+# Commit Message Conventions
+
+This project uses [Semantic Commit Messages](https://www.conventionalcommits.org/en/v1.0.0/) with emojis for clear and automated versioning.
+
+**Format:** `<type>(<scope>): <emoji> <subject>`
+
+**Example:** `feat(extraction): ✨ Implement core domain logic`
+
+**Common Types:**
+
+*   `feat`: A new feature.
+*   `fix`: A bug fix.
+*   `docs`: Documentation only changes.
+*   `style`: Changes that do not affect the meaning of the code (white-space, formatting, etc).
+*   `refactor`: A code change that neither fixes a bug nor adds a feature.
+*   `test`: Adding missing tests or correcting existing tests.
+*   `chore`: Changes to the build process or auxiliary tools.
+
+**Common Emojis:**
+
+*   ✨ `:sparkles:` when adding a new feature.
+*   🐛 `:bug:` when fixing a bug.
+*   📝 `:memo:` when writing docs.
+*   ♻️ `:recycle:` when refactoring code.
+*   ✅ `:white_check_mark:` when adding or updating tests.
+*   🔧 `:wrench:` when updating configuration files.
+*   🚀 `:rocket:` when deploying.
