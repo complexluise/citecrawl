@@ -6,7 +6,9 @@ from src.cli import extract, cite
 from src.models import ScrapedData, EnrichedData, Bibliography
 from unittest.mock import patch
 
-def test_extract_command_e2e():
+import logging
+
+def test_extract_command_e2e(mocker):
     """
     End-to-end test for the 'extract' command.
     It simulates the user flow of providing a CSV and getting updated CSV and Markdown files.
@@ -24,6 +26,9 @@ def test_extract_command_e2e():
         writer.writerow([2, '', '', '', '', 'https://anotherexample.com', '', '', '', False])
 
     runner = CliRunner()
+
+    # Mock the logger
+    mock_log = mocker.patch('src.cli.log')
 
     # Mock the scraping and enrichment functions
     with patch('src.cli.scrape_url') as mock_scrape, \
@@ -54,9 +59,9 @@ def test_extract_command_e2e():
 
     # Assert: Check command execution and output files
     assert result.exit_code == 0
-    assert "Processing https://example.com" in result.output
-    assert "Processing https://anotherexample.com" in result.output
-    assert "Processing complete" in result.output
+    mock_log.info.assert_any_call("Processing https://example.com...")
+    mock_log.info.assert_any_call("Processing https://anotherexample.com...")
+    mock_log.info.assert_any_call("Processing complete.")
 
     expected_file1 = os.path.join(output_path, "example_com.md")
     expected_file2 = os.path.join(output_path, "anotherexample_com.md")
@@ -76,7 +81,7 @@ def test_extract_command_e2e():
     shutil.rmtree(test_dir)
 
 
-def test_cite_command_e2e():
+def test_cite_command_e2e(mocker):
     """
     End-to-end test for the 'cite' command.
     It checks if the command correctly generates a bibliography.bib file.
@@ -96,13 +101,16 @@ def test_cite_command_e2e():
 
     runner = CliRunner()
 
+    # Mock the logger
+    mock_log = mocker.patch('src.cli.log')
+
     # Act: Run the 'cite' command
     result = runner.invoke(cite, [csv_path])
 
     # Assert: Check command execution and output file
     assert result.exit_code == 0
-    assert "Generating bibliography.bib..." in result.output
-    assert "Bibliography generated at" in result.output
+    mock_log.info.assert_any_call("Generating bibliography.bib...")
+    mock_log.info.assert_any_call(f"Bibliography generated at {bib_output_path}")
     assert os.path.exists(bib_output_path)
 
     # Assert: Check the content of the generated .bib file
@@ -139,6 +147,10 @@ def test_cite_command_with_google_docs_integration(mocker):
         writer.writerow([1, 'T', 'A', 2023, 'Article', 'https://example.com', 'S', 'Aspect 1', 'Comment 1', True])
 
     runner = CliRunner()
+
+    # Mock the logger
+    mock_log = mocker.patch('src.cli.log')
+
     # Patch the function in the module where it is defined
     mock_gdocs_update = mocker.patch('src.gdocs.update_google_doc')
 
@@ -147,7 +159,7 @@ def test_cite_command_with_google_docs_integration(mocker):
 
     # Assert
     assert result.exit_code == 0
-    assert "Updating citations in Google Doc..." in result.output
+    mock_log.info.assert_any_call("Updating citations in Google Doc...")
     mock_gdocs_update.assert_called_once()
     
     # Verify the bibtex content passed to the mock

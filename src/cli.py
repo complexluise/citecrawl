@@ -1,12 +1,29 @@
 import click
 import pandas as pd
 import os
+import logging
+import sys
+from rich.logging import RichHandler
+from rich.console import Console
 from urllib.parse import urlparse
 from src.extraction import scrape_url
 from src.enrichment import enrich_content
 from src.bibtex import generate_bibliography_file
 from src.models import ScrapedData, Publication
 from dotenv import load_dotenv
+
+import sys
+from rich.console import Console
+
+# --- Logger Setup ---
+# Configure logging to use RichHandler for beautiful output
+logging.basicConfig(
+    level="INFO",
+    format="%(message)s",
+    datefmt="[%X]",
+    handlers=[]
+)
+log = logging.getLogger("rich")
 
 # Load environment variables from .env file
 load_dotenv()
@@ -48,13 +65,13 @@ def extract(csv_path: str, output: str):
     firecrawl_api_key = os.getenv("FIRECRAWL_API_KEY")
     gemini_api_key = os.getenv("GEMINI_API_KEY")
     if not firecrawl_api_key or not gemini_api_key:
-        click.echo("Error: FIRECRAWL_API_KEY or GEMINI_API_KEY not found in environment variables.", err=True)
+        log.error("FIRECRAWL_API_KEY or GEMINI_API_KEY not found in environment variables.")
         return
 
     for index, row in df.iterrows():
         if not row['Extracted']:
             url = row['Enlace/URL']
-            click.echo(f"Processing {url}...")
+            log.info(f"Processing {url}...")
             
             # Scrape the URL
             scraped_data = scrape_url(row=row.to_dict(), api_key=firecrawl_api_key)
@@ -75,13 +92,13 @@ def extract(csv_path: str, output: str):
                 filepath = os.path.join(output, filename)
                 with open(filepath, "w", encoding="utf-8") as f:
                     f.write(scraped_data.content)
-                click.echo(f"  -> Saved to {filepath}")
+                log.info(f"  -> Saved to {filepath}")
             else:
-                click.echo(f"  -> Failed to extract content from {url}")
+                log.warning(f"  -> Failed to extract content from {url}")
 
     # Save the updated DataFrame to the CSV file
     df.to_csv(csv_path, index=False)
-    click.echo("Processing complete.")
+    log.info("Processing complete.")
 
 @cli.command()
 @click.argument('csv_path', type=click.Path(exists=True))
@@ -91,10 +108,10 @@ def cite(csv_path: str, doc_id: str):
     Generates a bibliography.bib file and optionally updates a Google Doc.
     """
     if not os.path.exists(csv_path):
-        click.echo(f"Error: {csv_path} not found", err=True)
+        log.error(f"Error: {csv_path} not found")
         return
 
-    click.echo("Generating bibliography.bib...")
+    log.info("Generating bibliography.bib...")
     # Define dtypes for string columns to avoid pandas inferring float for empty ones
     string_cols = ['Título', 'Autor(es)', 'Año de Publicación', 'Tipo de Recurso', 'Enlace/URL', 
                    'Resumen Principal', 'Aspectos Más Relevantes (Relacionado con Bibliotecas)', 
@@ -121,20 +138,24 @@ def cite(csv_path: str, doc_id: str):
     with open(bib_output_path, "w", encoding="utf-8") as f:
         f.write(bibtex_content)
 
-    click.echo(f"Bibliography generated at {bib_output_path}")
+    log.info(f"Bibliography generated at {bib_output_path}")
 
     # If a Google Doc ID is provided, update the doc
     if doc_id:
-        click.echo("Updating citations in Google Doc...")
+        log.info("Updating citations in Google Doc...")
         try:
             # Dynamic import to avoid issues when bibtex2docs is not installed
             from src.gdocs import update_google_doc
             update_google_doc(doc_id, bibtex_content)
-            click.echo("Google Doc update complete.")
+            log.info("Google Doc update complete.")
         except ImportError:
-            click.echo("Error: 'bibtex2docs' is not installed. Please install it to use the Google Docs integration.", err=True)
+            log.error("'bibtex2docs' is not installed. Please install it to use the Google Docs integration.")
         except Exception as e:
-            click.echo(f"Error updating Google Doc: {e}", err=True)
+            log.error(f"Error updating Google Doc: {e}")
 
 if __name__ == '__main__':
+    log = logging.getLogger("rich")
+    console = Console(file=sys.stdout)
+    handler = RichHandler(console=console, rich_tracebacks=True, show_path=False)
+    log.addHandler(handler)
     cli()
