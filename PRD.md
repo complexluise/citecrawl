@@ -19,11 +19,10 @@ This process is a significant bottleneck, taking time away from actual analysis 
 
 #### **3. User Stories**
 
-*   **Story 1: Extraction:** As a user, I want to provide a CSV file with a list of URLs so that the tool can automatically scrape and save the main content of each page locally.
-*   **Story 2: Enrichment:** As a user, I want to provide a specific question for each URL so that an AI can read the content and generate a concise summary that answers my question.
-*   **Story 3: Metadata Generation:** As a user, I want the AI to automatically extract key bibliographic metadata (Title, Author, Year, URL) from the content to save me from having to find it myself.
-*   **Story 4: Citation Management:** As a user, I want to generate a standard `bibliography.bib` file from all my processed sources so I can easily manage my citations.
-*   **Story 5: Google Docs Integration:** As a user, I want to run a single command to update the citations in my Google Doc manuscript, using the generated BibTeX file.
+*   **Story 1: Extraction:** As a user, I want to provide a CSV file with a list of URLs so that the tool can automatically scrape and save the main content of each page locally. The CSV file will have the following columns: `ID`, `Título`, `Autor(es)`, `Año de Publicación`, `Tipo de Recurso`, `Enlace/URL`, `Resumen Principal`, `Aspectos Más Relevantes (Relacionado con Bibliotecas)`, `Comentarios / Ideas para la Guía`, and `Extracted`. The `Extracted` field is a boolean that indicates whether the data has been processed. The user may fill in some fields manually.
+*   **Story 2: Enrichment:** As a user, I want the AI to read the scraped content and automatically fill in the missing fields in the CSV file, such as `Resumen Principal` and `Aspectos Más Relevantes`. This process will also extract key bibliographic metadata (Title, Author, Year, URL) to complete the CSV record.
+*   **Story 3: Citation Management:** As a user, I want to generate a standard `bibliography.bib` file from all my processed sources so I can easily manage my citations.
+*   **Story 4: Google Docs Integration:** As a user, I want to run a single command to update the citations in my Google Doc manuscript, using the generated BibTeX file.
 
 #### **4. Proposed Architecture**
 
@@ -64,30 +63,23 @@ This diagram illustrates the flow of data and the interaction between the differ
 ```mermaid
 graph TD
     subgraph User Input
-        A[input.csv with URLs/Prompts]
+        A[input.csv with URLs]
     end
 
-    subgraph "Step 1: extract"
+    subgraph "Step 1: extract & enrich"
         B(src/cli.py) -- reads --> A
         B -- calls --> C{src/extraction.py}
         C -- scrapes URL --> D{Firecrawl API}
-        D -- extract text --> E[output/article_1.md]
-        C -- saves --> E[output/article_1.md]
-        C -- saves --> F[results/metadata.csv]
-    end
-
-    subgraph "Step 2: enrich"
-        G(src/cli.py) -- reads --> F
-        G -- reads --> E
-        G -- calls --> H{src/enrichment.py}
-        H -- sends content/prompt --> I{Gemini API}
+        D -- returns content --> C
+        C -- calls --> H{src/enrichment.py}
+        H -- sends content --> I{Gemini API}
         I -- returns enriched data --> H
-        H -- prepends to --> E
-        H -- saves --> J[results/enriched_metadata.csv]
+        H -- updates --> A
+        C -- saves --> E[output/article_1.md]
     end
 
-    subgraph "Step 3: cite"
-        K(src/cli.py) -- reads --> J
+    subgraph "Step 2: cite"
+        K(src/cli.py) -- reads --> A
         K -- calls --> L{src/bibtex.py}
         L -- generates --> M[bibliography.bib]
         K -- calls --> N{src/gdocs.py}
@@ -96,8 +88,7 @@ graph TD
     end
 
     A --> B
-    F --> G
-    J --> K
+    A --> K
 ```
 
 ---
