@@ -71,6 +71,7 @@ graph TD
         B(src/cli.py) -- reads --> A
         B -- calls --> C{src/extraction.py}
         C -- scrapes URL --> D{Firecrawl API}
+        D -- extract text --> E[output/article_1.md]
         C -- saves --> E[output/article_1.md]
         C -- saves --> F[results/metadata.csv]
     end
