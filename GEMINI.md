@@ -43,22 +43,16 @@ This project follows a strict TDD methodology using the `pytest` framework. The 
 
 Use `uv run` to execute the pipeline commands within the project's virtual environment without needing to activate it first.
 
-1.  **Extract web content:**
+1.  **Extract and enrich content:**
     Run the `extract` command with the path to your CSV file:
     ```bash
     uv run python -m src.cli extract data/csv_with_links/input_links.csv
     ```
-    This will scrape the URLs in the CSV file and save the content to the `output` directory as Markdown files.
+    This will scrape the URLs in the CSV file, enrich the content, and save the results. The original CSV file will be updated with the enriched data.
 
-2.  **Enrich content:**
+2.  **Generate citations:**
     ```bash
-    uv run python -m src.cli enrich
-    ```
-    This command reads the extracted content and uses the Gemini API to generate summaries and extract bibliographic metadata.
-
-3.  **Generate citations:**
-    ```bash
-    uv run python -m src.cli cite <GOOGLE_DOC_ID>
+    uv run python -m src.cli cite data/csv_with_links/input_links.csv <GOOGLE_DOC_ID>
     ```
     This command generates a `bibliography.bib` file and updates the citations in the specified Google Doc.
 
