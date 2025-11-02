@@ -30,139 +30,85 @@ def sanitize_filename(url: str) -> str:
 @click.option('--output', default='output', help='The directory to save the scraped content.')
 def extract(csv_path: str, output: str):
     """
-    Scrapes the URLs from the given CSV file and saves the content.
+    Scrapes URLs from a CSV file, enriches the content, and saves the results.
     """
     # Ensure the output directory exists
     os.makedirs(output, exist_ok=True)
 
-    # Read the CSV file
-    df = pd.read_csv(csv_path)
+    # Define dtypes for string columns to avoid pandas inferring float for empty ones
+    string_cols = ['Título', 'Autor(es)', 'Año de Publicación', 'Tipo de Recurso', 'Enlace/URL', 
+                   'Resumen Principal', 'Aspectos Más Relevantes (Relacionado con Bibliotecas)', 
+                   'Comentarios / Ideas para la Guía']
+    dtype_map = {col: str for col in string_cols}
     
-    # Prepare a list to hold metadata for the new CSV
-    metadata_list = []
-
-    # Get API key from environment
+    # Read the CSV file
+    df = pd.read_csv(csv_path, dtype=dtype_map)
+    
+    # Get API keys from environment
     firecrawl_api_key = os.getenv("FIRECRAWL_API_KEY")
-    if not firecrawl_api_key:
-        click.echo("Error: FIRECRAWL_API_KEY not found in environment variables.", err=True)
-        return
-
-    for index, row in df.iterrows():
-        url = row['url']
-        prompt = row.get('prompt', '') # Use .get for optional prompt column
-        click.echo(f"Extracting from {url}...")
-        
-        # Scrape the URL
-        scraped_data = scrape_url(url=url, api_key=firecrawl_api_key)
-        
-        # Save the content to a Markdown file
-        if scraped_data and scraped_data.content:
-            filename = sanitize_filename(url)
-            filepath = os.path.join(output, filename)
-            with open(filepath, "w", encoding="utf-8") as f:
-                f.write(scraped_data.content)
-            click.echo(f"  -> Saved to {filepath}")
-            # Add metadata to the list
-            metadata_list.append({"url": url, "prompt": prompt, "filename": filename})
-        else:
-            click.echo(f"  -> Failed to extract content from {url}")
-
-    # Save the metadata to a new CSV file
-    if metadata_list:
-        metadata_df = pd.DataFrame(metadata_list)
-        metadata_csv_path = os.path.join(output, "metadata.csv")
-        metadata_df.to_csv(metadata_csv_path, index=False)
-        click.echo(f"Metadata saved to {metadata_csv_path}")
-
-    click.echo("Extraction complete.")
-
-@cli.command()
-@click.option('--input-dir', default='output', help='The directory containing the metadata.csv and content files.')
-def enrich(input_dir: str):
-    """
-    Enriches the scraped content with AI-generated summaries and metadata.
-    """
-    metadata_path = os.path.join(input_dir, "metadata.csv")
-    if not os.path.exists(metadata_path):
-        click.echo(f"Error: metadata.csv not found in {input_dir}", err=True)
-        return
-
-    df = pd.read_csv(metadata_path)
-    enriched_list = []
-
     gemini_api_key = os.getenv("GEMINI_API_KEY")
-    if not gemini_api_key:
-        click.echo("Error: GEMINI_API_KEY not found in environment variables.", err=True)
+    if not firecrawl_api_key or not gemini_api_key:
+        click.echo("Error: FIRECRAWL_API_KEY or GEMINI_API_KEY not found in environment variables.", err=True)
         return
 
     for index, row in df.iterrows():
-        filename = row['filename']
-        filepath = os.path.join(input_dir, filename)
-        
-        if not os.path.exists(filepath):
-            click.echo(f"  -> Warning: File {filename} not found. Skipping.")
-            continue
-
-        click.echo(f"Enriching content from {filename}...")
-        with open(filepath, "r+", encoding="utf-8") as f:
-            original_content = f.read()
-            scraped_data = ScrapedData(url=row['url'], content=original_content)
+        if not row['Extracted']:
+            url = row['Enlace/URL']
+            click.echo(f"Processing {url}...")
             
-            enriched_data = enrich_content(
-                scraped_data=scraped_data,
-                user_prompt=row['prompt'],
-                api_key=gemini_api_key
-            )
-
-            if enriched_data:
-                # Prepend the summary to the file
-                f.seek(0, 0)
-                f.write(f"# Summary\n\n{enriched_data.summary}\n\n---\n\n{original_content}")
+            # Scrape the URL
+            scraped_data = scrape_url(row=row.to_dict(), api_key=firecrawl_api_key)
+            
+            if scraped_data and scraped_data.content:
+                # Enrich the content
+                enriched_row = enrich_content(
+                    row=row.to_dict(),
+                    scraped_content=scraped_data.content,
+                    api_key=gemini_api_key
+                )
                 
-                # Append enriched data to our list for the new CSV
-                enriched_list.append({
-                    "url": row['url'],
-                    "summary": enriched_data.summary,
-                    "bib_title": enriched_data.bibliography.title,
-                    "bib_author": enriched_data.bibliography.author,
-                    "bib_year": enriched_data.bibliography.year,
-                    "filename": filename
-                })
-                click.echo(f"  -> Enriched {filename}")
+                # Update the DataFrame
+                df.loc[index] = pd.Series(enriched_row)
+                
+                # Save the content to a Markdown file
+                filename = sanitize_filename(url)
+                filepath = os.path.join(output, filename)
+                with open(filepath, "w", encoding="utf-8") as f:
+                    f.write(scraped_data.content)
+                click.echo(f"  -> Saved to {filepath}")
             else:
-                click.echo(f"  -> Failed to enrich {filename}")
+                click.echo(f"  -> Failed to extract content from {url}")
 
-    # Save the enriched metadata to a new CSV
-    if enriched_list:
-        enriched_df = pd.DataFrame(enriched_list)
-        enriched_csv_path = os.path.join(input_dir, "enriched_metadata.csv")
-        enriched_df.to_csv(enriched_csv_path, index=False)
-        click.echo(f"Enriched metadata saved to {enriched_csv_path}")
-
-    click.echo("Enrichment complete.")
+    # Save the updated DataFrame to the CSV file
+    df.to_csv(csv_path, index=False)
+    click.echo("Processing complete.")
 
 @cli.command()
-@click.option('--input-dir', default='output', help='The directory containing the enriched_metadata.csv file.')
+@click.argument('csv_path', type=click.Path(exists=True))
 @click.option('--doc-id', default=None, help='The Google Doc ID to update with the new citations.')
-def cite(input_dir: str, doc_id: str):
+def cite(csv_path: str, doc_id: str):
     """
     Generates a bibliography.bib file and optionally updates a Google Doc.
     """
-    enriched_csv_path = os.path.join(input_dir, "enriched_metadata.csv")
-    if not os.path.exists(enriched_csv_path):
-        click.echo(f"Error: enriched_metadata.csv not found in {input_dir}", err=True)
+    if not os.path.exists(csv_path):
+        click.echo(f"Error: {csv_path} not found", err=True)
         return
 
     click.echo("Generating bibliography.bib...")
-    df = pd.read_csv(enriched_csv_path)
+    # Define dtypes for string columns to avoid pandas inferring float for empty ones
+    string_cols = ['Título', 'Autor(es)', 'Año de Publicación', 'Tipo de Recurso', 'Enlace/URL', 
+                   'Resumen Principal', 'Aspectos Más Relevantes (Relacionado con Bibliotecas)', 
+                   'Comentarios / Ideas para la Guía']
+    dtype_map = {col: str for col in string_cols}
+    df = pd.read_csv(csv_path, dtype=dtype_map)
     
     # Convert dataframe rows to Publication objects
     publications = [
         Publication(
-            title=row['bib_title'],
-            author=row['bib_author'],
-            year=int(row['bib_year']) if pd.notna(row['bib_year']) else None,
-            url=row['url']
+            title=row['Título'],
+            author=row['Autor(es)'],
+            year=int(row['Año de Publicación']) if pd.notna(row['Año de Publicación']) else None,
+            url=row['Enlace/URL']
         )
         for index, row in df.iterrows()
     ]
