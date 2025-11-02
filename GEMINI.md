@@ -7,7 +7,7 @@ This project is a Python-based tool for scraping web pages, extracting bibliogra
 ## Prerequisites
 
 - Python 3.6+
-- Pip
+- uv
 
 ## Installation
 
@@ -19,13 +19,13 @@ This project is a Python-based tool for scraping web pages, extracting bibliogra
 
 2.  **Create a virtual environment:**
     ```bash
-    python -m venv .venv
+    uv venv
     source .venv/bin/activate  # On Windows, use `.venv\Scripts\activate`
     ```
 
 3.  **Install dependencies:**
     ```bash
-    pip install -r requirements.txt
+    uv pip install -r requirements.txt
     ```
 
 4.  **Set up environment variables:**
@@ -36,19 +36,24 @@ This project is a Python-based tool for scraping web pages, extracting bibliogra
 
 ## Running the scripts
 
-1.  **Scrape web pages:**
-    Run the `scraper.py` script with the path to your CSV file:
+Use `uv run` to execute the pipeline commands within the project's virtual environment without needing to activate it first.
+
+1.  **Extract web content:**
+    Run the `extract` command with the path to your CSV file:
     ```bash
-    python scraper.py path/to/your/file.csv
+    uv run python pipeline.py extract data/csv_with_links/input_links.csv
     ```
     This will scrape the URLs in the CSV file and save the content to the `output` directory as Markdown files.
 
-2.  **Generate BibTeX file:**
-    Run the `generate_bibtex.py` script:
+2.  **Enrich content (Coming Soon):**
     ```bash
-    python generate_bibtex.py
+    uv run python pipeline.py enrich
     ```
-    This will process the Markdown files in the `output` directory and generate a `bibliography.bib` file.
+
+3.  **Generate citations (Coming Soon):**
+    ```bash
+    uv run python pipeline.py cite <GOOGLE_DOC_ID>
+    ```
 
 # Development Conventions
 
