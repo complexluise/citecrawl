@@ -4,4 +4,7 @@ click
 pandas
 firecrawl-py
 python-dotenv
-bib2docs
+git+https://gitlab.com/xgrg/bibtex2docs.git
+google-generativeai
+pytest
+pytest-mock

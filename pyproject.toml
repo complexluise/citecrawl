@@ -1,0 +1,19 @@
+[project]
+name = "scrapeAnyPage"
+version = "0.1.0"
+description = "A simple AI pipeline to extract, enrich and process links."
+authors = [
+    {name = "Gemini", email = "gemini@example.com"},
+]
+license = { text = "MIT" }
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = "src"
