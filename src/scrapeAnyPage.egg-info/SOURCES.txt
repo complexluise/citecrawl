@@ -1,6 +1,0 @@
-pyproject.toml
-src/scrapeAnyPage.egg-info/PKG-INFO
-src/scrapeAnyPage.egg-info/SOURCES.txt
-src/scrapeAnyPage.egg-info/dependency_links.txt
-src/scrapeAnyPage.egg-info/top_level.txt
-tests/test_extraction.py
