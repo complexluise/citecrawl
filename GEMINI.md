@@ -18,7 +18,7 @@ This project follows a strict TDD methodology using the `pytest` framework. The 
 1.  **Clone the repository:**
     ```bash
     git clone <repository-url>
-    cd scrapeAnyPage
+    cd CiteCrawl
     ```
 
 2.  **Create a virtual environment:**
@@ -46,13 +46,13 @@ Use `uv run` to execute the pipeline commands within the project's virtual envir
 1.  **Extract and enrich content:**
     Run the `extract` command with the path to your CSV file:
     ```bash
-    uv run python -m src.cli extract data/csv_with_links/input_links.csv
+    uv run python -m citecrawl extract data/csv_with_links/input_links.csv
     ```
     This will scrape the URLs in the CSV file, enrich the content, and save the results. The original CSV file will be updated with the enriched data.
 
 2.  **Generate citations:**
     ```bash
-    uv run python -m src.cli cite data/csv_with_links/input_links.csv <GOOGLE_DOC_ID>
+    uv run python -m citecrawl cite data/csv_with_links/input_links.csv <GOOGLE_DOC_ID>
     ```
     This command generates a `bibliography.bib` file and updates the citations in the specified Google Doc.
 
@@ -69,7 +69,7 @@ uv run pytest
 - The project uses the `click` library for creating command-line interfaces.
 - The `rich` library is used for logging to provide rich, colorful output.
 - The project follows standard Python conventions.
-- The project is structured with a `src` directory for the main source code and a `tests` directory for tests.
+- The project is structured with a `citecrawl` directory for the main source code and a `tests` directory for tests.
 - The `firecrawl` library is used for web scraping.
 - The `google-generativeai` library is for content enrichment.
 - The `bibtex2docs` library is used for updating citations in Google Docs.

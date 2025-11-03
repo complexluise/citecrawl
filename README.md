@@ -32,8 +32,8 @@ Sigue estos pasos para tener el proyecto funcionando en tu computadora.
 
 1.  **Clona el repositorio:**
     ```bash
-    git clone https://github.com/tu-usuario/scrapeAnyPage.git
-    cd scrapeAnyPage
+    git clone https://github.com/tu-usuario/CiteCrawl.git
+    cd CiteCrawl
     ```
 
 2.  **Crea y activa un entorno virtual:**
@@ -58,48 +58,38 @@ Sigue estos pasos para tener el proyecto funcionando en tu computadora.
 
 ## Modo de Uso
 
-La herramienta funciona con tres comandos principales: `extract`, `enrich` y `cite`.
+La herramienta funciona con dos comandos principales: `extract` y `cite`.
 
-### Paso 1: Extraer Contenido
+### Paso 1: Extraer y Enriquecer Contenido
 
-Este comando lee tu archivo CSV de URLs, extrae el contenido de cada página y lo guarda en archivos Markdown dentro de la carpeta `output/`.
+Este comando lee tu archivo CSV de URLs, extrae el contenido de cada página, lo enriquece con la IA y lo guarda en archivos Markdown dentro de la carpeta `output/`.
 
--   **Entrada**: Un archivo CSV con una columna `url`. También puedes añadir una columna `prompt` con tu pregunta para cada URL.
+-   **Entrada**: Un archivo CSV con una columna `Enlace/URL`.
 
     *Ejemplo `input.csv`:*
     ```csv
-    url,prompt
-    "https://ejemplo.com/articulo1","¿Cuál es el argumento principal de este artículo?"
-    "https://ejemplo.org/articulo2","Resume los hallazgos clave."
+    ID,Título,Autor(es),Año de Publicación,Tipo de Recurso,Enlace/URL,Resumen Principal,Aspectos Más Relevantes (Relacionado con Bibliotecas),Comentarios / Ideas para la Guía,Extracted
+    1,"","","",,"https://ejemplo.com/articulo1","","","","",FALSE
+    2,"","","",,"https://ejemplo.org/articulo2","","","","",FALSE
     ```
 
 -   **Comando:**
     ```bash
-    uv run python -m src.cli extract ruta/a/tu/input.csv
+    uv run python -m citecrawl extract ruta/a/tu/input.csv
     ```
     *Puedes usar la opción `--output` para elegir otra carpeta de destino.*
 
-### Paso 2: Enriquecer el Contenido
-
-Este comando lee los archivos extraídos, usa la IA para generar los resúmenes y datos bibliográficos, y guarda los resultados.
-
--   **Comando:**
-    ```bash
-    uv run python -m src.cli enrich --input-dir output
-    ```
-    *El comando busca el archivo `metadata.csv` que se creó en el paso anterior.*
-
-### Paso 3: Generar Citas
+### Paso 2: Generar Citas
 
 Este comando crea el archivo `bibliography.bib` con toda tu bibliografía. Si quieres, también puede actualizar un documento de Google Docs.
 
 -   **Comando:**
     ```bash
     # Para generar solo el archivo local bibliography.bib
-    uv run python -m src.cli cite --input-dir output
+    uv run python -m citecrawl cite ruta/a/tu/input.csv
 
     # Para también actualizar un Google Doc
-    uv run python -m src.cli cite --input-dir output --doc-id "el_id_de_tu_documento"
+    uv run python -m citecrawl cite ruta/a/tu/input.csv --doc-id "el_id_de_tu_documento"
     ```
 
 ## Desarrollo
