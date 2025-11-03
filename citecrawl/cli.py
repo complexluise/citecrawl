@@ -3,6 +3,7 @@ import pandas as pd
 import os
 import logging
 import sys
+import re
 from rich.logging import RichHandler
 from rich.console import Console
 from urllib.parse import urlparse
@@ -62,7 +63,9 @@ def extract(csv_path: str, output: str):
     if not firecrawl_api_key or not gemini_api_key:
         log.error("FIRECRAWL_API_KEY or GEMINI_API_KEY not found in environment variables.")
         return
-
+    
+    rows = [row for row in rows if not row.extracted]
+    
     updated_rows = []
     for row in rows:
         if not row.extracted:
@@ -117,15 +120,20 @@ def cite(csv_path: str, doc_id: str):
     rows = load_urls_from_csv(csv_path)
     
     # Convert CSVRow objects to Publication objects
-    publications = [
-        Publication(
+    publications = []
+    for row in rows:
+        year = None
+        if row.publication_year:
+            match = re.search(r'\d{4}', str(row.publication_year))
+            if match:
+                year = int(match.group(0))
+
+        publications.append(Publication(
             title=row.title,
             author=row.authors,
-            year=int(row.publication_year) if row.publication_year else None,
+            year=year,
             url=row.url
-        )
-        for row in rows
-    ]
+        ))
 
     # Generate the .bib file content
     bibtex_content = generate_bibliography_file(publications)
