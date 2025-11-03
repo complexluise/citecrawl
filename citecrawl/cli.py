@@ -83,6 +83,11 @@ def extract(csv_path: str, output: str):
                 filename = sanitize_filename(row.url)
                 filepath = os.path.join(output, filename)
                 with open(filepath, "w", encoding="utf-8") as f:
+                    # Write the enriched data as YAML front matter
+                    f.write("---\n")
+                    for field, value in row.model_dump(by_alias=True).items():
+                        f.write(f"{field}: {value}\n")
+                    f.write("---\n\n")
                     f.write(scraped_data.content)
                 log.info(f"  -> Saved to {filepath}")
             else:
