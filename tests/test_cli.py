@@ -3,7 +3,7 @@ import shutil
 import csv
 from click.testing import CliRunner
 from src.cli import extract, cite
-from src.models import ScrapedData, EnrichedData, Bibliography
+from src.models import ScrapedData, CSVRow
 from unittest.mock import patch
 
 import logging
@@ -40,18 +40,18 @@ def test_extract_command_e2e(mocker):
         ]
         
         mock_enrich.side_effect = [
-            {
-                'ID': 1, 'Título': 'Example Title', 'Autor(es)': 'Author 1', 'Año de Publicación': 2023, 
+            CSVRow(**{
+                'ID': 1, 'Título': 'Example Title', 'Autor(es)': 'Author 1', 'Año de Publicación': '2023', 
                 'Tipo de Recurso': 'Article', 'Enlace/URL': 'https://example.com', 
                 'Resumen Principal': 'This is a summary.', 'Aspectos Más Relevantes (Relacionado con Bibliotecas)': 'Aspect 1', 
                 'Comentarios / Ideas para la Guía': 'Comment 1', 'Extracted': True
-            },
-            {
-                'ID': 2, 'Título': 'Another Example Title', 'Autor(es)': 'Author 2', 'Año de Publicación': 2024, 
+            }),
+            CSVRow(**{
+                'ID': 2, 'Título': 'Another Example Title', 'Autor(es)': 'Author 2', 'Año de Publicación': '2024', 
                 'Tipo de Recurso': 'Blog Post', 'Enlace/URL': 'https://anotherexample.com', 
                 'Resumen Principal': 'This is another summary.', 'Aspectos Más Relevantes (Relacionado con Bibliotecas)': 'Aspect 2', 
                 'Comentarios / Ideas para la Guía': 'Comment 2', 'Extracted': True
-            }
+            })
         ]
 
         # Act: Run the 'extract' command
@@ -95,7 +95,7 @@ def test_cite_command_e2e(mocker):
     # Create dummy CSV file
     with open(csv_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
-        writer.writerow(['ID', 'Título', 'Autor(es)', 'Año de Publicación', 'Tipo de Recuro', 'Enlace/URL', 'Resumen Principal', 'Aspectos Más Relevantes (Relacionado con Bibliotecas)', 'Comentarios / Ideas para la Guía', 'Extracted'])
+        writer.writerow(['ID', 'Título', 'Autor(es)', 'Año de Publicación', 'Tipo de Recurso', 'Enlace/URL', 'Resumen Principal', 'Aspectos Más Relevantes (Relacionado con Bibliotecas)', 'Comentarios / Ideas para la Guía', 'Extracted'])
         writer.writerow([1, 'Title 1', 'Author 1', 2023, 'Article', 'https://example.com', 'Summary 1', 'Aspect 1', 'Comment 1', True])
         writer.writerow([2, 'Title 2', 'Author 2', 2024, 'Blog Post', 'https://example.org', 'Summary 2', 'Aspect 2', 'Comment 2', True])
 

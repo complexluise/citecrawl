@@ -1,12 +1,12 @@
-from unittest.mock import MagicMock, patch
-from src.models import ScrapedData, EnrichedData, Bibliography
+from unittest.mock import MagicMock
+from src.models import CSVRow
 from src.enrichment import enrich_content
 import google.generativeai as genai
 
-def test_enrich_row_updates_dictionary(mocker):
+def test_enrich_row_updates_model(mocker):
     """
     Tests that the enrich_content function correctly calls the Gemini API
-    and updates the dictionary with the enriched data.
+    and updates the Pydantic model with the enriched data.
     """
     # Arrange
     # 1. Mock the Gemini API client
@@ -17,13 +17,11 @@ def test_enrich_row_updates_dictionary(mocker):
         "Título": "Test Title"
     }
     """
-    # Patch the entire module, not just the class
     mocker.patch('src.enrichment.genai.GenerativeModel', return_value=mock_genai_model)
     mocker.patch('src.enrichment.genai.configure')
 
-
     # 2. Create input data
-    row = {
+    row = CSVRow(**{
         'ID': 1,
         'Título': '',
         'Autor(es)': '',
@@ -34,7 +32,7 @@ def test_enrich_row_updates_dictionary(mocker):
         'Aspectos Más Relevantes (Relacionado con Bibliotecas)': '',
         'Comentarios / Ideas para la Guía': '',
         'Extracted': False
-    }
+    })
     scraped_content = "This is the content of the scraped page."
     api_key = "fake_gemini_key"
 
@@ -43,10 +41,10 @@ def test_enrich_row_updates_dictionary(mocker):
 
     # Assert
     # 1. Verify the return type and content
-    assert isinstance(result, dict)
-    assert result['Resumen Principal'] == "This is a test summary."
-    assert result['Título'] == "Test Title"
-    assert result['Extracted'] is True
+    assert isinstance(result, CSVRow)
+    assert result.main_summary == "This is a test summary."
+    assert result.title == "Test Title"
+    assert result.extracted is True
 
     # 2. Verify the API was called correctly
     genai.configure.assert_called_once_with(api_key=api_key)

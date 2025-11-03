@@ -56,3 +56,18 @@ class Publication(BaseModel):
             bibtex_entry += f"  {'url':<10} = {{{self.url}}}\n"
         bibtex_entry += "}}\n"
         return bibtex_entry
+
+class CSVRow(BaseModel):
+    """
+    Represents a single row from the input CSV file, with aliases for Spanish column names.
+    """
+    id: int = Field(..., alias='ID')
+    title: Optional[str] = Field(None, alias='Título')
+    authors: Optional[str] = Field(None, alias='Autor(es)')
+    publication_year: Optional[str] = Field(None, alias='Año de Publicación')
+    resource_type: Optional[str] = Field(None, alias='Tipo de Recurso')
+    url: str = Field(..., alias='Enlace/URL')
+    main_summary: Optional[str] = Field(None, alias='Resumen Principal')
+    relevant_aspects: Optional[str] = Field(None, alias='Aspectos Más Relevantes (Relacionado con Bibliotecas)')
+    comments: Optional[str] = Field(None, alias='Comentarios / Ideas para la Guía')
+    extracted: bool = Field(..., alias='Extracted')

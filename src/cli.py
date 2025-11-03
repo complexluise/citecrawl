@@ -6,10 +6,11 @@ import sys
 from rich.logging import RichHandler
 from rich.console import Console
 from urllib.parse import urlparse
-from src.extraction import scrape_url
+from src.extraction import scrape_url, load_urls_from_csv
 from src.enrichment import enrich_content
 from src.bibtex import generate_bibliography_file
-from src.models import ScrapedData, Publication
+import csv
+from src.models import ScrapedData, Publication, CSVRow
 from dotenv import load_dotenv
 
 import sys
@@ -52,14 +53,8 @@ def extract(csv_path: str, output: str):
     # Ensure the output directory exists
     os.makedirs(output, exist_ok=True)
 
-    # Define dtypes for string columns to avoid pandas inferring float for empty ones
-    string_cols = ['Título', 'Autor(es)', 'Año de Publicación', 'Tipo de Recurso', 'Enlace/URL', 
-                   'Resumen Principal', 'Aspectos Más Relevantes (Relacionado con Bibliotecas)', 
-                   'Comentarios / Ideas para la Guía']
-    dtype_map = {col: str for col in string_cols}
-    
-    # Read the CSV file
-    df = pd.read_csv(csv_path, dtype=dtype_map)
+    # Load the data from the CSV file
+    rows = load_urls_from_csv(csv_path)
     
     # Get API keys from environment
     firecrawl_api_key = os.getenv("FIRECRAWL_API_KEY")
@@ -68,36 +63,38 @@ def extract(csv_path: str, output: str):
         log.error("FIRECRAWL_API_KEY or GEMINI_API_KEY not found in environment variables.")
         return
 
-    for index, row in df.iterrows():
-        if not row['Extracted']:
-            url = row['Enlace/URL']
-            log.info(f"Processing {url}...")
+    updated_rows = []
+    for row in rows:
+        if not row.extracted:
+            log.info(f"Processing {row.url}...")
             
             # Scrape the URL
-            scraped_data = scrape_url(row=row.to_dict(), api_key=firecrawl_api_key)
+            scraped_data = scrape_url(row=row, api_key=firecrawl_api_key)
             
             if scraped_data and scraped_data.content:
                 # Enrich the content
-                enriched_row = enrich_content(
-                    row=row.to_dict(),
+                row = enrich_content(
+                    row=row,
                     scraped_content=scraped_data.content,
                     api_key=gemini_api_key
                 )
                 
-                # Update the DataFrame
-                df.loc[index] = pd.Series(enriched_row)
-                
                 # Save the content to a Markdown file
-                filename = sanitize_filename(url)
+                filename = sanitize_filename(row.url)
                 filepath = os.path.join(output, filename)
                 with open(filepath, "w", encoding="utf-8") as f:
                     f.write(scraped_data.content)
                 log.info(f"  -> Saved to {filepath}")
             else:
-                log.warning(f"  -> Failed to extract content from {url}")
+                log.warning(f"  -> Failed to extract content from {row.url}")
+        updated_rows.append(row)
 
-    # Save the updated DataFrame to the CSV file
-    df.to_csv(csv_path, index=False)
+    # Save the updated data to the CSV file
+    with open(csv_path, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow([field.alias for field in CSVRow.model_fields.values()])
+        for row in updated_rows:
+            writer.writerow(row.model_dump(by_alias=True).values())
     log.info("Processing complete.")
 
 @cli.command()
@@ -112,22 +109,17 @@ def cite(csv_path: str, doc_id: str):
         return
 
     log.info("Generating bibliography.bib...")
-    # Define dtypes for string columns to avoid pandas inferring float for empty ones
-    string_cols = ['Título', 'Autor(es)', 'Año de Publicación', 'Tipo de Recurso', 'Enlace/URL', 
-                   'Resumen Principal', 'Aspectos Más Relevantes (Relacionado con Bibliotecas)', 
-                   'Comentarios / Ideas para la Guía']
-    dtype_map = {col: str for col in string_cols}
-    df = pd.read_csv(csv_path, dtype=dtype_map)
+    rows = load_urls_from_csv(csv_path)
     
-    # Convert dataframe rows to Publication objects
+    # Convert CSVRow objects to Publication objects
     publications = [
         Publication(
-            title=row['Título'],
-            author=row['Autor(es)'],
-            year=int(row['Año de Publicación']) if pd.notna(row['Año de Publicación']) else None,
-            url=row['Enlace/URL']
+            title=row.title,
+            author=row.authors,
+            year=int(row.publication_year) if row.publication_year else None,
+            url=row.url
         )
-        for index, row in df.iterrows()
+        for row in rows
     ]
 
     # Generate the .bib file content
