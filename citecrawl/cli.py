@@ -148,7 +148,7 @@ def cite(csv_path: str, doc_id: str):
         log.info("Updating citations in Google Doc...")
         try:
             # Dynamic import to avoid issues when bibtex2docs is not installed
-            from src.gdocs import update_google_doc
+            from citecrawl.gdocs import update_google_doc
             update_google_doc(doc_id, bibtex_content)
             log.info("Google Doc update complete.")
         except ImportError:
