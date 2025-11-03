@@ -1,4 +1,4 @@
-from firecrawl import FirecrawlApp
+from firecrawl import Firecrawl
 from citecrawl.models import ScrapedData, CSVRow
 import csv
 
@@ -14,7 +14,13 @@ def load_urls_from_csv(csv_path: str) -> list[CSVRow]:
     """
     with open(csv_path, mode='r', encoding='utf-8') as file:
         reader = csv.DictReader(file)
-        return [CSVRow(**row) for row in reader]
+        rows = []
+        for i, row_data in enumerate(reader):
+            # Pydantic will use the alias 'Enlace/URL' to populate the 'url' field
+            row_data['ID'] = i + 1
+            row_data['Extracted'] = False
+            rows.append(CSVRow.model_validate(row_data))
+        return rows
 
 def scrape_url(row: CSVRow, api_key: str) -> ScrapedData:
     """
@@ -30,17 +36,11 @@ def scrape_url(row: CSVRow, api_key: str) -> ScrapedData:
     """
     url = row.url
     try:
-        app = FirecrawlApp(api_key=api_key)
+        app = Firecrawl(api_key=api_key)
         scraped_result = app.scrape(url=url)
-
-        # Ensure scraped_result is a dictionary
-        if not isinstance(scraped_result, dict):
-            # Handle cases where the scrape might not return the expected dict
-            # (e.g., errors, empty responses)
-            return ScrapedData(url=url)
-
-        content = scraped_result.get('content', '')
-        metadata = scraped_result.get('metadata', {})
+        
+        content = scraped_result.markdown
+        metadata = dict(scraped_result.metadata)
 
         return ScrapedData(
             url=url,
