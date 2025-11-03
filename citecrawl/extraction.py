@@ -18,7 +18,10 @@ def load_urls_from_csv(csv_path: str) -> list[CSVRow]:
         for i, row_data in enumerate(reader):
             # Pydantic will use the alias 'Enlace/URL' to populate the 'url' field
             row_data['ID'] = i + 1
-            row_data['Extracted'] = False
+            if 'Extracted' not in row_data:
+                row_data['Extracted'] = False
+            else:
+                row_data['Extracted'] = row_data['Extracted'].lower() in ['true', '1', 't', 'y', 'yes']
             rows.append(CSVRow.model_validate(row_data))
         return rows
 
