@@ -26,12 +26,12 @@ This process is a significant bottleneck, taking time away from actual analysis 
 
 #### **4. Proposed Architecture**
 
-To ensure the project is maintainable, testable, and scalable, we will adopt a structured layout. All source code will reside in a `src` directory, with a separate `tests` directory.
+To ensure the project is maintainable, testable, and scalable, we will adopt a structured layout. All source code will reside in a `citecrawl` directory, with a separate `tests` directory.
 
 **New File Structure:**
 
 ```
-scrapeAnyPage/
+CiteCrawl/
 ├── .env
 ├── .gitignore
 ├── data/
@@ -40,8 +40,9 @@ scrapeAnyPage/
 │   └── article_1.md
 ├── results/
 │   └── enriched_metadata.csv
-├── src/
+├── citecrawl/
 │   ├── __init__.py
+│   ├── __main__.py
 │   ├── cli.py          # Main entry point with Click commands
 │   ├── extraction.py   # Was scraper_module.py
 │   ├── enrichment.py   # Was enricher_module.py
@@ -67,11 +68,11 @@ graph TD
     end
 
     subgraph "Step 1: extract & enrich"
-        B(src/cli.py) -- reads --> A
-        B -- calls --> C{src/extraction.py}
+        B(citecrawl/cli.py) -- reads --> A
+        B -- calls --> C{citecrawl/extraction.py}
         C -- scrapes URL --> D{Firecrawl API}
         D -- returns content --> C
-        C -- calls --> H{src/enrichment.py}
+        C -- calls --> H{citecrawl/enrichment.py}
         H -- sends content --> I{Gemini API}
         I -- returns enriched data --> H
         H -- updates --> A
@@ -79,10 +80,10 @@ graph TD
     end
 
     subgraph "Step 2: cite"
-        K(src/cli.py) -- reads --> A
-        K -- calls --> L{src/bibtex.py}
+        K(citecrawl/cli.py) -- reads --> A
+        K -- calls --> L{citecrawl/bibtex.py}
         L -- generates --> M[bibliography.bib]
-        K -- calls --> N{src/gdocs.py}
+        K -- calls --> N{citecrawl/gdocs.py}
         N -- uses --> M
         N -- updates --> O{Google Docs API}
     end
