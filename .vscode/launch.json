@@ -2,10 +2,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "CLI: extract",
+            "name": "CiteCrawl: extract",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/src/cli.py",
+            "module": "citecrawl",
             "console": "integratedTerminal",
             "args": [
                 "extract",
@@ -13,13 +13,14 @@
                 "--output",
                 "output"
             ],
-            "envFile": "${workspaceFolder}/.env"
+            "envFile": "${workspaceFolder}/.env",
+            "cwd": "${workspaceFolder}"
         },
         {
-            "name": "CLI: cite",
+            "name": "CiteCrawl: cite",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/src/cli.py",
+            "module": "citecrawl",
             "console": "integratedTerminal",
             "args": [
                 "cite",
@@ -28,7 +29,8 @@
                 "--doc-id",
                 "YOUR_GOOGLE_DOC_ID_HERE"
             ],
-            "envFile": "${workspaceFolder}/.env"
+            "envFile": "${workspaceFolder}/.env",
+            "cwd": "${workspaceFolder}"
         }
     ]
 }
