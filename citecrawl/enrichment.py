@@ -1,6 +1,6 @@
 import json
 import google.generativeai as genai
-from src.models import CSVRow
+from citecrawl.models import CSVRow
 
 def enrich_content(row: CSVRow, scraped_content: str, api_key: str) -> CSVRow:
     """

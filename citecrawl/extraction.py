@@ -1,5 +1,5 @@
 from firecrawl import FirecrawlApp
-from src.models import ScrapedData, CSVRow
+from citecrawl.models import ScrapedData, CSVRow
 import csv
 
 def load_urls_from_csv(csv_path: str) -> list[CSVRow]:

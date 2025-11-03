@@ -6,11 +6,11 @@ import sys
 from rich.logging import RichHandler
 from rich.console import Console
 from urllib.parse import urlparse
-from src.extraction import scrape_url, load_urls_from_csv
-from src.enrichment import enrich_content
-from src.bibtex import generate_bibliography_file
+from citecrawl.extraction import scrape_url, load_urls_from_csv
+from citecrawl.enrichment import enrich_content
+from citecrawl.bibtex import generate_bibliography_file
 import csv
-from src.models import ScrapedData, Publication, CSVRow
+from citecrawl.models import ScrapedData, Publication, CSVRow
 from dotenv import load_dotenv
 
 import sys

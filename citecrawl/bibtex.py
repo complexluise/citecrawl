@@ -1,5 +1,5 @@
 from typing import List
-from src.models import Publication
+from citecrawl.models import Publication
 
 def generate_bibliography_file(publications: List[Publication]) -> str:
     """
