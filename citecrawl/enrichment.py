@@ -1,20 +1,21 @@
 import json
 import google.generativeai as genai
-from citecrawl.models import CSVRow
+from citecrawl.models import CSVRow, ScrapedData
 
-def enrich_content(row: CSVRow, scraped_content: str, api_key: str) -> CSVRow:
+def enrich_content(scraped_data: ScrapedData, api_key: str) -> CSVRow:
     """
     Enriches the scraped content by generating a summary and extracting
     bibliographic metadata using the Gemini API.
 
     Args:
-        row: A CSVRow object representing a row from the CSV file.
-        scraped_content: The content scraped from the URL.
+        scraped_data: A ScrapedData object containing the scraped content and metadata.
         api_key: The API key for the Gemini service.
 
     Returns:
         An updated CSVRow object with the enriched data.
     """
+    row = scraped_data.csv_row
+    scraped_content = scraped_data.content
     genai.configure(api_key=api_key)
     model = genai.GenerativeModel('gemini-2.5-flash')
 

@@ -77,8 +77,7 @@ def extract(csv_path: str, output: str):
             if scraped_data and scraped_data.content:
                 # Enrich the content
                 row = enrich_content(
-                    row=row,
-                    scraped_content=scraped_data.content,
+                    scraped_data=scraped_data,
                     api_key=gemini_api_key
                 )
                 

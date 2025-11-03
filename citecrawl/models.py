@@ -8,6 +8,7 @@ class ScrapedData(BaseModel):
     url: str
     content: str = ""
     metadata: Dict[str, Any] = Field(default_factory=dict)
+    csv_row: Optional['CSVRow'] = None
 
 class Bibliography(BaseModel):
     """
@@ -71,3 +72,11 @@ class CSVRow(BaseModel):
     relevant_aspects: Optional[str] = Field(None, alias='Aspectos Más Relevantes (Relacionado con Bibliotecas)')
     comments: Optional[str] = Field(None, alias='Comentarios / Ideas para la Guía')
     extracted: bool = Field(..., alias='Extracted')
+    description: Optional[str] = Field(None, alias='Description')
+    language: Optional[str] = Field(None, alias='Language')
+    keywords: Optional[str] = Field(None, alias='Keywords')
+    og_title: Optional[str] = Field(None, alias='OG Title')
+    og_description: Optional[str] = Field(None, alias='OG Description')
+    og_image: Optional[str] = Field(None, alias='OG Image')
+    favicon: Optional[str] = Field(None, alias='Favicon')
+    source_url: Optional[str] = Field(None, alias='Source URL')

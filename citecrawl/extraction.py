@@ -45,13 +45,24 @@ def scrape_url(row: CSVRow, api_key: str) -> ScrapedData:
         content = scraped_result.markdown
         metadata = dict(scraped_result.metadata)
 
+        # Populate the new fields in the CSVRow object
+        row.description = metadata.get('description')
+        row.language = metadata.get('language')
+        row.keywords = metadata.get('keywords')
+        row.og_title = metadata.get('og_title')
+        row.og_description = metadata.get('og_description')
+        row.og_image = metadata.get('og_image')
+        row.favicon = metadata.get('favicon')
+        row.source_url = metadata.get('source_url')
+
         return ScrapedData(
             url=url,
             content=content,
-            metadata=metadata
+            metadata=metadata,
+            csv_row=row
         )
     except Exception as e:
         # In case of an exception during the scrape, return an empty ScrapedData object
         # to ensure the function is robust. A logging mechanism could be added here.
         print(f"An error occurred while scraping {url}: {e}")
-        return ScrapedData(url=url)
+        return ScrapedData(url=url, csv_row=row)
