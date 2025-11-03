@@ -1,6 +1,6 @@
 from unittest.mock import patch, MagicMock
-from src.extraction import scrape_url, load_urls_from_csv
-from src.models import ScrapedData, CSVRow
+from citecrawl.extraction import scrape_url, load_urls_from_csv
+from citecrawl.models import ScrapedData, CSVRow
 import pandas as pd
 import pytest
 
@@ -36,7 +36,7 @@ def test_returns_scraped_data_object(mocker):
     and returns a structured ScrapedData object.
     """
     # Arrange: Configure the mock to simulate a successful scrape
-    mock_firecrawl_app = mocker.patch('src.extraction.FirecrawlApp')
+    mock_firecrawl_app = mocker.patch('citecrawl.extraction.FirecrawlApp')
     mock_scrape_data = {
         'content': '# Example Domain\nThis domain is for use in illustrative examples.',
         'metadata': {
@@ -80,7 +80,7 @@ def test_handles_empty_scrape_result(mocker):
     from the scraping service gracefully.
     """
     # Arrange
-    mock_firecrawl_app = mocker.patch('src.extraction.FirecrawlApp')
+    mock_firecrawl_app = mocker.patch('citecrawl.extraction.FirecrawlApp')
     mock_scrape_data = {}  # Simulate an empty response
     mock_firecrawl_instance = MagicMock()
     mock_firecrawl_instance.scrape.return_value = mock_scrape_data

@@ -1,6 +1,6 @@
 from unittest.mock import MagicMock
-from src.models import CSVRow
-from src.enrichment import enrich_content
+from citecrawl.models import CSVRow
+from citecrawl.enrichment import enrich_content
 import google.generativeai as genai
 
 def test_enrich_row_updates_model(mocker):
@@ -17,8 +17,8 @@ def test_enrich_row_updates_model(mocker):
         "Título": "Test Title"
     }
     """
-    mocker.patch('src.enrichment.genai.GenerativeModel', return_value=mock_genai_model)
-    mocker.patch('src.enrichment.genai.configure')
+    mocker.patch('citecrawl.enrichment.genai.GenerativeModel', return_value=mock_genai_model)
+    mocker.patch('citecrawl.enrichment.genai.configure')
 
     # 2. Create input data
     row = CSVRow(**{

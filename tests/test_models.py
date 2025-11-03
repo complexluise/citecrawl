@@ -1,6 +1,6 @@
 import pytest
 from pydantic import ValidationError
-from src.models import CSVRow
+from citecrawl.models import Publication, CSVRow
 
 def test_csv_row_model_parses_correctly():
     """

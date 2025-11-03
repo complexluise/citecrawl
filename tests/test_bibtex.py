@@ -1,5 +1,5 @@
-from src.models import Publication
-from src.bibtex import generate_bibliography_file
+from citecrawl.models import Publication
+from citecrawl.bibtex import generate_bibliography_file
 
 def test_generate_bibliography_file():
     """

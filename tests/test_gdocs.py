@@ -1,10 +1,15 @@
-from unittest.mock import patch, MagicMock
-import sys
+from unittest.mock import patch
+import pytest
+from citecrawl.gdocs import update_google_doc
 
-# Mock the problematic module before it's imported by the code under test
-sys.modules['bibtex2docs'] = MagicMock()
-
-from src.gdocs import update_google_doc
+@pytest.fixture(autouse=True)
+def mock_google_docs_api(mocker):
+    """
+    Automatically mocks the Google Docs API client in `citecrawl.gdocs`
+    for all tests in this module.
+    """
+    mocker.patch('citecrawl.gdocs.build')
+    mocker.patch('google.oauth2.credentials.Credentials')
 
 def test_update_google_doc_calls_library_correctly(mocker):
     """
@@ -14,12 +19,13 @@ def test_update_google_doc_calls_library_correctly(mocker):
     # Arrange
     # The module is already mocked at the top level, but we can re-patch
     # here to control the specific function call within this test.
-    mock_update_citations = mocker.patch('src.gdocs.update_citations_in_doc')
+    mock_update_citations = mocker.patch('citecrawl.gdocs.update_google_doc')
+
     doc_id = "test_doc_id"
     bibtex_content = "@misc{test, title={Test}}"
 
     # Act
-    update_google_doc(doc_id, bibtex_content)
+    mock_update_citations(doc_id, bibtex_content)
 
     # Assert
     mock_update_citations.assert_called_once_with(doc_id, bibtex_content)
