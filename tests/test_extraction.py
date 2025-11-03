@@ -36,17 +36,16 @@ def test_returns_scraped_data_object(mocker):
     and returns a structured ScrapedData object.
     """
     # Arrange: Configure the mock to simulate a successful scrape
-    mock_firecrawl_app = mocker.patch('citecrawl.extraction.FirecrawlApp')
-    mock_scrape_data = {
-        'content': '# Example Domain\nThis domain is for use in illustrative examples.',
-        'metadata': {
-            'title': 'Example Domain',
-            'description': 'An example domain for use in tests.',
-        }
+    mock_firecrawl = mocker.patch('citecrawl.extraction.Firecrawl')
+    mock_scrape_data = MagicMock()
+    mock_scrape_data.markdown = '# Example Domain\nThis domain is for use in illustrative examples.'
+    mock_scrape_data.metadata = {
+        'title': 'Example Domain',
+        'description': 'An example domain for use in tests.',
     }
     mock_firecrawl_instance = MagicMock()
     mock_firecrawl_instance.scrape.return_value = mock_scrape_data
-    mock_firecrawl_app.return_value = mock_firecrawl_instance
+    mock_firecrawl.return_value = mock_firecrawl_instance
 
     test_row = CSVRow(
         ID=1,
@@ -67,11 +66,11 @@ def test_returns_scraped_data_object(mocker):
     # Assert: Verify the return type and content
     assert isinstance(result, ScrapedData)
     assert result.url == test_row.url
-    assert result.content == mock_scrape_data['content']
+    assert result.content == mock_scrape_data.markdown
     assert result.metadata['title'] == 'Example Domain'
 
     # Assert: Verify the mock was called correctly
-    mock_firecrawl_app.assert_called_once_with(api_key="fake_key")
+    mock_firecrawl.assert_called_once_with(api_key="fake_key")
     mock_firecrawl_instance.scrape.assert_called_once_with(url=test_row.url)
 
 def test_handles_empty_scrape_result(mocker):
@@ -80,11 +79,13 @@ def test_handles_empty_scrape_result(mocker):
     from the scraping service gracefully.
     """
     # Arrange
-    mock_firecrawl_app = mocker.patch('citecrawl.extraction.FirecrawlApp')
-    mock_scrape_data = {}  # Simulate an empty response
+    mock_firecrawl = mocker.patch('citecrawl.extraction.Firecrawl')
+    mock_scrape_data = MagicMock()
+    mock_scrape_data.markdown = ""
+    mock_scrape_data.metadata = {}
     mock_firecrawl_instance = MagicMock()
     mock_firecrawl_instance.scrape.return_value = mock_scrape_data
-    mock_firecrawl_app.return_value = mock_firecrawl_instance
+    mock_firecrawl.return_value = mock_firecrawl_instance
 
     test_row = CSVRow(
         ID=1,
