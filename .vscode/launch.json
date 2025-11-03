@@ -9,7 +9,7 @@
             "console": "integratedTerminal",
             "args": [
                 "extract",
-                "data/csv_with_links/input_links.csv",
+                "data/csv_with_links/Recursos guia - Género e inclusión en la IA.csv",
                 "--output",
                 "output"
             ],
