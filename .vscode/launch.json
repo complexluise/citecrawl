@@ -1,0 +1,34 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "CLI: extract",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/cli.py",
+            "console": "integratedTerminal",
+            "args": [
+                "extract",
+                "data/csv_with_links/input_links.csv",
+                "--output",
+                "output"
+            ],
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "name": "CLI: cite",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/cli.py",
+            "console": "integratedTerminal",
+            "args": [
+                "cite",
+                "--input-dir",
+                "output",
+                "--doc-id",
+                "YOUR_GOOGLE_DOC_ID_HERE"
+            ],
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
