@@ -1,5 +1,5 @@
 [project]
-name = "scrapeAnyPage"
+name = "CiteCrawl"
 version = "0.1.0"
 description = "A simple AI pipeline to extract, enrich and process links."
 authors = [
@@ -13,7 +13,7 @@ classifiers = [
 ]
 
 [tool.setuptools.packages.find]
-where = ["src"]
+where = ["citecrawl"]
 
 [tool.pytest.ini_options]
-pythonpath = "src"
+pythonpath = "citecrawl"
