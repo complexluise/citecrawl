@@ -64,7 +64,6 @@ def extract(csv_path: str, output: str):
         log.error("FIRECRAWL_API_KEY or GEMINI_API_KEY not found in environment variables.")
         return
     
-    rows = [row for row in rows if not row.extracted]
     
     updated_rows = []
     for row in rows:
@@ -139,7 +138,7 @@ def cite(csv_path: str, doc_id: str):
 
     # Write to bibliography.bib
     bib_output_path = "bibliography.bib"
-    with open(bib_output_path, "w", encoding="utf-8") as f:
+    with open(bib_output_path, "a", encoding="utf-8") as f:
         f.write(bibtex_content)
 
     log.info(f"Bibliography generated at {bib_output_path}")

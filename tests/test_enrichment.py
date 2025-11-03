@@ -1,5 +1,5 @@
 from unittest.mock import MagicMock
-from citecrawl.models import CSVRow
+from citecrawl.models import CSVRow, ScrapedData
 from citecrawl.enrichment import enrich_content
 import google.generativeai as genai
 
@@ -33,11 +33,15 @@ def test_enrich_row_updates_model(mocker):
         'Comentarios / Ideas para la Guía': '',
         'Extracted': False
     })
-    scraped_content = "This is the content of the scraped page."
+    scraped_data = ScrapedData(
+        url=row.url,
+        content="This is the content of the scraped page.",
+        csv_row=row
+    )
     api_key = "fake_gemini_key"
 
     # Act
-    result = enrich_content(row, scraped_content, api_key)
+    result = enrich_content(scraped_data, api_key)
 
     # Assert
     # 1. Verify the return type and content

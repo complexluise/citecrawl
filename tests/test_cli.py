@@ -8,6 +8,81 @@ from unittest.mock import patch
 
 import logging
 
+def test_extract_command_preserves_all_rows(mocker):
+    """
+    Tests that the 'extract' command preserves all rows in the CSV,
+    only updating the ones that have not been extracted.
+    """
+    # Arrange: Create a temporary directory and a dummy CSV file
+    test_dir = "test_extract_preserves_rows"
+    os.makedirs(test_dir, exist_ok=True)
+    csv_path = os.path.join(test_dir, "input.csv")
+    output_path = os.path.join(test_dir, "output")
+
+    # Row 1 is already extracted, Row 2 will be extracted, Row 3 will fail extraction
+    initial_rows = [
+        ['ID', 'Título', 'Autor(es)', 'Año de Publicación', 'Tipo de Recurso', 'Enlace/URL', 'Resumen Principal', 'Aspectos Más Relevantes (Relacionado con Bibliotecas)', 'Comentarios / Ideas para la Guía', 'Extracted', 'Description', 'Language', 'Keywords', 'OG Title', 'OG Description', 'OG Image', 'Favicon', 'Source URL'],
+        [1, 'Existing Title', 'Existing Author', '2022', 'Article', 'https://existing.com', 'Summary', 'Aspect', 'Comment', True, '', '', '', '', '', '', '', ''],
+        [2, '', '', '', '', 'https://new.com', '', '', '', False, '', '', '', '', '', '', '', ''],
+        [3, '', '', '', '', 'https://fail.com', '', '', '', False, '', '', '', '', '', '', '', '']
+    ]
+    with open(csv_path, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerows(initial_rows)
+
+    runner = CliRunner()
+    mocker.patch('citecrawl.cli.log')
+
+    # Mock the scraping and enrichment functions
+    with patch('citecrawl.cli.scrape_url') as mock_scrape, \
+         patch('citecrawl.cli.enrich_content') as mock_enrich:
+
+        # Mock successful scrape and enrich for the second URL
+        mock_scrape.side_effect = [
+            ScrapedData(url="https://new.com", content="# New Content"),
+            ScrapedData(url="https://fail.com", content="") # Failed scrape
+        ]
+        
+        mock_enrich.return_value = CSVRow(**{
+            'ID': 2, 'Título': 'New Title', 'Autor(es)': 'New Author', 'Año de Publicación': '2023', 
+            'Tipo de Recurso': 'Blog', 'Enlace/URL': 'https://new.com', 
+            'Resumen Principal': 'New Summary', 'Aspectos Más Relevantes (Relacionado con Bibliotecas)': 'New Aspect', 
+            'Comentarios / Ideas para la Guía': 'New Comment', 'Extracted': True
+        })
+
+        # Act: Run the 'extract' command
+        result = runner.invoke(extract, [csv_path, "--output", output_path])
+
+    # Assert
+    assert result.exit_code == 0
+
+    # Check that the CSV file still has the same number of rows
+    with open(csv_path, "r", newline="", encoding="utf-8") as f:
+        reader = list(csv.reader(f))
+        # 1 header row + 3 data rows
+        assert len(reader) == 4
+
+        # Verify the header is correct
+        assert reader[0] == initial_rows[0]
+
+        # Verify the first row (already extracted) is untouched
+        assert reader[1] == [str(v) for v in initial_rows[1]]
+
+        # Verify the second row was updated
+        updated_row = reader[2]
+        assert updated_row[1] == 'New Title'
+        assert updated_row[9] == 'True'
+
+        # Verify the third row (failed extraction) is still present and marked as not extracted
+        failed_row = reader[3]
+        assert failed_row[1] == ''
+        assert failed_row[9] == 'False'
+
+
+    # Teardown
+    shutil.rmtree(test_dir)
+
+
 def test_extract_command_e2e(mocker):
     """
     End-to-end test for the 'extract' command.
