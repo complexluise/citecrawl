@@ -16,7 +16,7 @@ def enrich_content(row: CSVRow, scraped_content: str, api_key: str) -> CSVRow:
         An updated CSVRow object with the enriched data.
     """
     genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-pro')
+    model = genai.GenerativeModel('gemini-2.5-flash')
 
     system_prompt = f"""
     You are a research assistant. Your task is to analyze the provided web page content
