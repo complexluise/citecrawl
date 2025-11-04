@@ -31,9 +31,13 @@ Si eres investigador, estudiante o bibliotecario, sabes que procesar múltiples 
 ## Características Principales
 
 -   **Extracción Automática**: Dale un archivo CSV con URLs y la herramienta guardará el contenido principal de cada página en archivos Markdown limpios.
--   **Resúmenes con IA**: La IA genera un resumen inicial del contenido. Revísalo siempre - puede omitir detalles importantes o interpretar diferente a ti.
+
+-   ✨ **Análisis Personalizado con Preguntas**:  Puedes dejar campos vacíos en tu CSV o incluso escribir preguntas específicas en ellos. La IA leerá el contenido de cada URL e intentará responder tus preguntas o llenar la información que necesitas. Por ejemplo, puedes preguntar "¿Cómo se relaciona esto con bibliotecas?" o "¿Qué aplicaciones prácticas tiene?" y la IA buscará respuestas en el contenido.
+
 -   **Extracción de Datos Bibliográficos**: La IA intenta identificar título, autor y año. **Estos datos necesitan verificación** - la IA puede equivocarse o inventar información.
+
 -   **Citas en Formato BibTeX**: Genera un borrador del archivo `bibliography.bib`, compatible con gestores de referencias como Zotero o Mendeley. Revisa las entradas antes de usarlas.
+
 -   **Integración con Google Docs**: (Opcional, en desarrollo) Actualiza las citas en tu manuscrito de Google Docs.
 
 ## Cómo Empezar
@@ -116,7 +120,9 @@ ID,Título,Autor(es),Año de Publicación,Tipo de Recurso,Enlace/URL,Resumen Pri
 2,"","","",,"https://ejemplo.org/articulo2","","","","",FALSE
 ```
 
-> 💡 **Consejo**: Puedes dejar los otros campos vacíos. La IA intentará llenarlos por ti, pero tú los revisarás después.
+> 💡 **Tip**: Puedes dejar campos vacíos (la IA los llenará) o escribir preguntas específicas en ellos como "¿Cómo se relaciona esto con bibliotecas?". La IA leerá el artículo completo e intentará responder.
+>
+> ⚠️ **Importante**: Siempre verifica las respuestas - la IA puede equivocarse o interpretar diferente.
 
 **Comando para ejecutar:**
 ```bash
