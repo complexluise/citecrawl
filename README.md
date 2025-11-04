@@ -1,7 +1,7 @@
 # Pipeline de IA: De Contenido Web a Citas Bibliográficas
 
 [![Python 3.6+](https://img.shields.io/badge/python-3.6+-blue.svg)](https://www.python.org/downloads/)
-[![Coverage Status](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://shields.io/)
+![Coverage](./coverage.svg)
 [![Built with Click](https://img.shields.io/badge/Built%20with-Click-brightgreen)](https://click.palletsprojects.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -38,7 +38,7 @@ Si eres investigador, estudiante o bibliotecario, sabes que procesar múltiples 
 
 ## Cómo Empezar
 
-Sigue estos pasos con calma. Si es tu primera vez usando herramientas de línea de comandos, está bien si te toma tiempo - todos empezamos así.
+Si es tu primera vez usando herramientas de línea de comandos, está bien si te toma tiempo - todos empezamos así.
 
 ### Requisitos
 
@@ -205,7 +205,9 @@ Si procesas muchas URLs, eventualmente necesitarás pagar por los servicios de A
 
 ## Para Desarrolladores
 
-Si quieres contribuir al proyecto o ejecutar las pruebas:
+Si quieres contribuir al proyecto, consulta [CONTRIBUTING.md](./CONTRIBUTING.md) para guías completas sobre desarrollo y filosofía de uso de IA.
+
+### Ejecutar Tests
 
 ```bash
 # Ejecutar todas las pruebas
@@ -214,6 +216,27 @@ uv run pytest
 # Ejecutar con reporte de cobertura
 uv run pytest --cov=citecrawl
 ```
+
+### Actualizar el Badge de Coverage
+
+Después de correr los tests, actualiza el badge de coverage:
+
+```bash
+# 1. Instalar coverage-badge si no lo tienes
+uv pip install coverage-badge
+
+# 2. Correr tests con coverage
+uv run pytest --cov=citecrawl
+
+# 3. Generar el nuevo badge
+uv run coverage-badge -o coverage.svg
+
+# 4. Commit el archivo coverage.svg actualizado
+git add coverage.svg
+git commit -m "chore: 🔧 Update coverage badge"
+```
+
+El badge en el README se actualizará automáticamente al referenciar el nuevo `coverage.svg`.
 
 ## Licencia
 
