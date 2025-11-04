@@ -141,7 +141,25 @@ Test configuration is in pyproject.toml with `pythonpath = "citecrawl"`.
 - The `Extracted` column (boolean) tracks which rows have been processed to avoid reprocessing
 - The CLI updates the original CSV file **in place** with enriched data - be careful with this behavior
 - All Spanish column names are mapped via Pydantic Field aliases (e.g., `Título` → `title`)
-- Empty fields in CSV are left empty - the AI attempts to fill them during enrichment
+
+### Custom Questions Feature
+
+**Important Feature**: Users can interact with the AI enrichment in two ways:
+
+1. **Leave fields empty** - The AI will attempt to fill them automatically based on the content
+2. **Write specific questions** - Users can type questions directly in CSV fields like:
+   - "¿Cómo se relaciona esto con bibliotecas?" in "Aspectos Más Relevantes"
+   - "¿Qué aplicaciones prácticas tiene?" in "Comentarios / Ideas para la Guía"
+
+The AI will read the entire article content and attempt to answer these specific questions. This makes the tool highly customizable - users aren't limited to generic extraction, they can guide the AI to extract exactly what they need.
+
+**Example CSV with questions**:
+```csv
+ID,Enlace/URL,Resumen Principal,Aspectos Más Relevantes (Relacionado con Bibliotecas),Comentarios / Ideas para la Guía,Extracted
+1,https://example.com,"¿De qué trata?","¿Cómo podría usarlo en mi biblioteca?","¿Qué riesgos éticos debo considerar?",FALSE
+```
+
+This is highlighted as a key feature in the README because it significantly increases the tool's utility.
 
 ### AI Enrichment Context
 
