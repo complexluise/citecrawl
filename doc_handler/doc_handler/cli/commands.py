@@ -8,6 +8,9 @@ from pathlib import Path
 from doc_handler.domain.parser import parse_markdown
 from doc_handler.domain.exceptions import SectionNotFoundError
 from doc_handler.infrastructure.embedding_analyzer import EmbeddingAnalyzer
+from doc_handler.infrastructure.file_handler import (
+    create_backup, show_diff, prompt_confirmation, apply_changes, remove_redundant_paragraph
+)
 
 
 console = Console()
@@ -185,6 +188,127 @@ def check_redundancy(file_path: str, threshold: float):
 
             if report.redundancy_count > 10:
                 console.print(f"... y {report.redundancy_count - 10} redundancias más", style="dim")
+
+    except Exception as e:
+        console.print(f"\n[bold red]Error: {str(e)}[/bold red]")
+        raise
+
+
+@cli.command()
+@click.argument("file_path", type=click.Path(exists=True))
+@click.argument("section_title")
+@click.option("--threshold", default=0.7, type=float, help="Similarity threshold (0.0-1.0)")
+@click.option("--interactive", is_flag=True, help="Interactively review each redundancy")
+def propose_fix(file_path: str, section_title: str, threshold: float, interactive: bool):
+    """Propose fixes for redundancies in a section with user approval.
+
+    FILE_PATH: Path to the Markdown file
+    SECTION_TITLE: Exact title of the section to analyze
+
+    Analyzes redundancies and proposes removing duplicates. Shows diff and
+    asks for confirmation before making changes. Creates automatic backup.
+    """
+    file_path_obj = Path(file_path)
+
+    # Header
+    console.print(
+        Panel.fit(
+            f"Propuesta de cambios para \"{section_title}\"",
+            border_style="blue"
+        )
+    )
+
+    try:
+        # Parse document
+        with console.status("[bold green]Parseando documento..."):
+            content = file_path_obj.read_text(encoding='utf-8')
+            doc = parse_markdown(content, path=file_path_obj, generate_embeddings=True)
+
+        console.print(f"[green]Documento parseado: {len(doc.sections)} secciones encontradas[/green]")
+
+        # Find section
+        try:
+            section = doc.find_section(section_title)
+        except SectionNotFoundError as e:
+            console.print(f"\n[bold red]Error: Sección \"{section_title}\" no encontrada[/bold red]\n")
+            console.print("[bold]Secciones disponibles:[/bold]")
+            for title in e.available:
+                console.print(f"  * {title}")
+            return
+
+        # Analyze redundancies
+        with console.status(f"[bold yellow]Analizando sección ({len(section.paragraphs)} párrafos)..."):
+            analyzer = EmbeddingAnalyzer()
+            report = analyzer.analyze_section(section, threshold=threshold)
+
+        # Display results
+        if not report.has_redundancies:
+            console.print("\n[bold green]No se encontraron redundancias para corregir[/bold green]")
+            return
+
+        console.print(f"\n[bold yellow]Encontradas {report.redundancy_count} redundancias. Proponiendo correcciones:[/bold yellow]\n")
+
+        changes_applied = 0
+        current_content = content
+
+        # Process each redundancy
+        for i, redundancy in enumerate(report.redundancies, 1):
+            console.print(f"\n[bold cyan]Redundancia #{i} (Similitud: {redundancy.similarity_percentage}%):[/bold cyan]")
+
+            # Show redundant paragraphs
+            table = Table(border_style="yellow")
+            table.add_column("Párrafo", style="cyan")
+            table.add_column("Línea", style="magenta")
+            table.add_column("Contenido", style="white", overflow="fold")
+
+            table.add_row(
+                f"#{redundancy.paragraph1.index + 1}",
+                str(redundancy.paragraph1.line_number),
+                redundancy.paragraph1.text[:150] + "..." if len(redundancy.paragraph1.text) > 150
+                else redundancy.paragraph1.text
+            )
+            table.add_row(
+                f"#{redundancy.paragraph2.index + 1}",
+                str(redundancy.paragraph2.line_number),
+                redundancy.paragraph2.text[:150] + "..." if len(redundancy.paragraph2.text) > 150
+                else redundancy.paragraph2.text
+            )
+
+            console.print(table)
+
+            console.print(f"\n[yellow]Propuesta:[/yellow] Eliminar párrafo #{redundancy.paragraph2.index + 1}")
+
+            # Generate proposed change
+            new_content = remove_redundant_paragraph(current_content, redundancy.paragraph2)
+
+            # Show diff
+            show_diff(current_content, new_content, console)
+
+            # Ask for confirmation
+            if prompt_confirmation(console):
+                # Create backup (only once, before first change)
+                if changes_applied == 0:
+                    backup_path = create_backup(file_path_obj)
+                    console.print(f"\n[dim]Backup creado: {backup_path}[/dim]")
+
+                # Apply change
+                current_content = new_content
+                changes_applied += 1
+                console.print("[bold green]Cambio aplicado[/bold green]")
+            else:
+                console.print("[dim]Cambio descartado[/dim]")
+
+            # In non-interactive mode, only process first redundancy
+            if not interactive:
+                break
+
+        # Save all changes if any were applied
+        if changes_applied > 0:
+            apply_changes(file_path_obj, current_content)
+            console.print(f"\n[bold green]✓ {changes_applied} cambio(s) aplicado(s) exitosamente[/bold green]")
+            console.print(f"[dim]Backup en: {file_path_obj}.backup[/dim]")
+        else:
+            console.print("\n[yellow]No se aplicaron cambios[/yellow]")
 
     except Exception as e:
         console.print(f"\n[bold red]Error: {str(e)}[/bold red]")
