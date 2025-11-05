@@ -355,3 +355,4 @@ When writing or updating documentation:
 - **[GEMINI.md](./GEMINI.md)**: Context file for Google Gemini AI
 - **[PRD.md](./PRD.md)**: Product Requirements Document with user stories
 - **[README.md](./README.md)**: User-facing documentation (in Spanish)
+- Use always uv so you dont need to activate venv.

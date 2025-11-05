@@ -224,4 +224,6 @@ __marimo__/
 *.html
 
 
-"bibliography.bib" 
+"bibliography.bib"
+
+/nlp_analysis/
