@@ -1,109 +1,151 @@
-# PRD — Plataforma Inteligente de Escritura en Markdown (Versión depurada)
+# MVP: Editor Markdown con IA
 
-## 1) **Visión y Metas**
+## El problema
 
-### **Visión**
+Escribir documentos largos en Markdown es caótico:
+- No hay forma de trabajar sobre "Capítulo 3" sin navegar manualmente
+- Encuentras redundancias cuando ya escribiste 50 páginas
+- No hay herramientas que entiendan la estructura del documento
 
-Crear una plataforma moderna para escribir en Markdown con apoyo de IA, donde el documento deje de ser “texto plano” y se convierta en un **objeto estructurado e inteligente** que permite analizar, editar y mejorar contenidos con control del autor.
-El editor debe permitir al usuario *pensar, reescribir, depurar y conectar secciones* con fluidez, apoyándose en IA solo cuando agrega valor real.
+## La solución (v0.1)
 
-### **Metas del MVP**
+Un script Python que:
 
-* Representar un archivo Markdown como un **árbol navegable de secciones**.
-* Permitir operaciones inteligentes sobre partes específicas del documento (capítulos, secciones, párrafos).
-* Detectar **redundancias**, proponer síntesis y permitir aplicar cambios con control humano.
-* Generar o mejorar **continuidad narrativa** entre secciones (transiciones).
-* Integrar RAG para sugerir **citas o fuentes** según el contenido.
-* Exponer estas capacidades de forma usable **por humanos y también como herramientas para un agente de IA**.
+1. **Carga un archivo .md y lo parsea en árbol de secciones**
+   - Cada `#`, `##`, `###` es un nodo con su contenido
+   - Puedes referirte a secciones por título o índice
 
-### **No-Metas del MVP**
+2. **Detecta redundancias en una sección específica**
+   - Llamas al script: `python editor.py doc.md --check-redundancy "Capítulo 2"`
+   - Un LLM analiza los párrafos y encuentra repeticiones
+   - Te muestra: "Párrafos 3 y 7 son 85% similares"
 
-* Edición colaborativa en tiempo real.
-* Gestión avanzada de bibliografías, estilos o compilación .bib → PDF.
-* Control de versiones complejo (se usará un modelo simple).
+3. **Propone cambios con aprobación humana**
+   - Te muestra un diff: texto original vs. sugerencia
+   - Aceptas o rechazas
+   - Solo si aceptas, actualiza el archivo
 
----
+## Historias de usuario
 
-## 2) **Personas (Usuarios objetivo)**
+### US-001: Parsear documento en árbol navegable
+**Como** autor de documentos largos
+**Quiero** que el sistema cargue mi archivo .md y lo represente como árbol de secciones
+**Para** poder trabajar sobre partes específicas sin navegar manualmente
 
-| Persona                                  | Motivación                                               | Necesidad principal                                                          |
-| ---------------------------------------- | -------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| **Autor/a** (académico, técnico, ensayo) | Escribir con claridad, coherencia y buen flujo narrativo | Un entorno que facilite estructurar ideas, mejorar texto, evitar redundancia |
-| **Editor/a**                             | Curar contenido para publicación o calidad               | Herramientas para diagnóstico, síntesis, revisión y aplicación de mejoras    |
-| **Investigador/a**                       | Respaldar ideas con fuentes y rigor                      | Integrar citas y referencias fácilmente desde un corpus de conocimiento      |
+**Criterios de aceptación**:
+- Parsea correctamente `#`, `##`, `###` como niveles jerárquicos
+- Cada sección incluye: nivel, título, contenido, líneas de inicio/fin
+- Puedo referirme a secciones por título exacto o índice numérico
 
----
+### US-002: Detectar redundancias en una sección
+**Como** editor de contenido
+**Quiero** identificar párrafos redundantes en una sección específica
+**Para** consolidar ideas y mejorar la claridad del texto
 
-## 3) **Historias de Usuario (Agile — con valor)**
+**Criterios de aceptación**:
+- Comando: `check-redundancy "Título de sección"`
+- Analiza solo la sección especificada (no todo el documento)
+- Reporta pares de párrafos con similitud ≥70%
+- Muestra un resumen claro: "Párrafos X e Y son Z% similares"
 
-> Formato: **Como [usuario], quiero [acción/resultado], para [valor/beneficio].**
+### US-003: Aplicar cambios con aprobación manual
+**Como** autor
+**Quiero** revisar propuestas de consolidación antes de aplicarlas
+**Para** mantener control sobre mi texto y evitar cambios no deseados
 
-### **Estructura y navegación del documento**
+**Criterios de aceptación**:
+- Muestra diff lado a lado (original vs. propuesta)
+- Pregunta confirmación: "¿Aplicar cambio? [s/N]"
+- Solo actualiza el archivo si el usuario acepta explícitamente
+- Preserva formato y espaciado del documento original
 
-1. **Como autor**, quiero ver el documento como un *índice estructurado por capítulos y secciones*, **para orientarme rápidamente y entender el flujo global del texto**.
-2. **Como editor**, quiero seleccionar una sección desde el índice y trabajar únicamente sobre ella, **para concentrarme sin distracciones y mejorar su calidad**.
-3. **Como autor**, quiero poder reordenar secciones fácilmente, **para reorganizar la lógica o narrativa sin perder tiempo con cortes y pegados manuales**.
+## Qué NO es MVP
 
-### **Edición asistida por IA**
+Estas cosas NO van en v0.1 (pueden esperar):
 
-4. **Como editor**, quiero que el sistema detecte redundancias dentro de un capítulo o sección, **para consolidar ideas repetidas y mejorar la claridad del texto**.
-5. **Como autor**, quiero recibir propuestas de reescritura que mantengan mi estilo, **para mejorar calidad sin perder mi voz propia**.
-6. **Como autor**, quiero que el sistema genere transiciones entre dos secciones, **para lograr una lectura fluida y coherente**.
-7. **Como autor**, quiero acceder a un tablero de análisis lingüístico y semántico de mi texto (coherencia, legibilidad, sentimiento y diversidad léxica), **para obtener insights objetivos que me permitan decidir estratégicamente cómo mejorar mi escritura**.
+- ❌ RAG o sugerencias de citas → v0.2
+- ❌ Generar transiciones entre secciones → v0.3
+- ❌ UI gráfica (Streamlit, web) → v0.4
+- ❌ Reordenar secciones (puedes hacerlo manualmente)
+- ❌ Análisis lingüístico complejo (coherencia, sentimiento)
 
-### **RAG y fuentes**
+## Criterio de éxito
 
-8. **Como investigador**, quiero obtener sugerencias de fuentes relevantes para una sección específica, **para respaldar afirmaciones con evidencia y aumentar rigor**.
-9. **Como autor académico**, quiero insertar citas sugeridas en el formato @bibkey en el punto adecuado del texto, **para mantener consistencia y rapidez al citar**.
+Puedo hacer esto en 5 minutos:
 
-### **Operaciones estructurales**
+```bash
+# 1. Detectar redundancias
+python -m doc_handler check-redundancy mi_tesis.md "Capítulo 2: Metodología"
 
-10. **Como editor**, quiero insertar contenido *antes o después de un título específico*, **para expandir ideas sin alterar manualmente la estructura**.
-11. **Como autor**, quiero fusionar dos secciones relacionadas, **para evitar fragmentación y mejorar cohesión temática**.
+# Output esperado (con Rich formatting):
+#
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🔍 Análisis de redundancias en "Capítulo 2: Metodología"
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#
+# ✓ Documento parseado: 8 secciones encontradas
+# ⚙ Analizando sección (3 párrafos)...
+#
+# ⚠ Encontradas 2 redundancias:
+#
+# ┌─────────────────────────────────────────────────────┐
+# │ Redundancia #1 • Similitud: 87%                    │
+# ├─────────────────────────────────────────────────────┤
+# │ Párrafo 3: "El enfoque cualitativo permite..."     │
+# │ Párrafo 7: "La metodología cualitativa facilita..."│
+# └─────────────────────────────────────────────────────┘
+#
+# Propuesta: Consolidar en párrafo 3 y eliminar párrafo 7
+# ¿Ver diff completo? [s/N]
 
----
+s
 
-## 4) **Alcance Funcional del MVP (Qué sí y qué no)**
+# Muestra diff con colores (verde/rojo)
+# ¿Aplicar cambio? [s/N]
 
-### **Incluido**
+s
 
-| Área                    | Funciones esenciales del MVP                                                                 |
-| ----------------------- | -------------------------------------------------------------------------------------------- |
-| **Estructura Markdown** | Cargar archivo · Visualizar árbol · Navegar y seleccionar secciones                          |
-| **Operaciones básicas** | Extraer, mover, insertar y fusionar secciones; insertar contenido antes/después de un título |
-| **IA – Edición**        | Detección de redundancias · Propuestas de síntesis · Generación de transiciones              |
-| **IA – RAG**            | Sugerencia de fuentes y citas según el contenido de una sección                              |
-| **Control del autor**   | Vista previa de cambios · Aprobación manual antes de aplicar modificaciones                  |
+# ✓ Cambios aplicados a mi_tesis.md
+```
 
-### **Excluido en MVP (diferido)**
+## Stack técnico
 
-* Edición colaborativa en tiempo real
-* Automatización de estilos de citación (APA, MLA…)
-* Múltiples archivos simultáneos o proyectos complejos
+- **CLI**: Click (comandos y argumentos)
+- **UI**: Rich (outputs coloridos, tablas, progreso)
+- **Validación**: Pydantic (modelos de datos robustos)
+- **LLM**: API de tu elección (Gemini, OpenAI, etc.)
 
----
+## Arquitectura en capas
 
-## 5) **Arquitectura Propuesta (Simple, clara y centrada en el núcleo)**
+Diseño modular que separa dominio de infraestructura:
 
-### **Principio rector**
+```
+doc_handler/
+├── domain/              # Lógica de negocio (sin dependencias externas)
+│   ├── models.py        # Pydantic: Document, Section, Redundancy
+│   ├── parser.py        # Markdown → Document tree
+│   └── analyzer.py      # Interface para análisis (protocolo)
+│
+├── infrastructure/      # Implementaciones concretas
+│   ├── llm_analyzer.py  # Implementa analyzer con LLM real
+│   └── file_handler.py  # Lee/escribe archivos
+│
+└── cli/                 # Interfaz de usuario
+    └── commands.py      # Click commands + Rich output
+```
 
-El **núcleo del producto es el Objeto Markdown**:
-Debe modelar el documento como estructura editable y comprensible para IA y para el usuario.
-Todo lo demás (UI, agente, RAG) **se conecta a ese núcleo**.
+**Principios**:
+- El dominio NO conoce Click, Rich, ni APIs externas
+- Puedes testear `domain/` sin mocks complejos
+- Cambiar de LLM o UI no toca la lógica core
+- La capa CLI orquesta: llama al dominio y renderiza con Rich
 
-### **Componentes del MVP**
+## Entregables
 
-| Componente                           | Rol                                                                                   |
-| ------------------------------------ | ------------------------------------------------------------------------------------- |
-| **Core Markdown Object**             | Representa el documento como árbol de secciones; expone métodos para editarlo         |
-| **Módulo de Análisis de Texto (IA)** | Identifica redundancias, propone síntesis, genera transiciones                        |
-| **Módulo RAG**                       | Recupera fuentes relevantes para alimentar el texto                                   |
-| **Capa de Herramientas para IA**     | Exposición de funciones del núcleo como “acciones” que un agente puede ejecutar       |
-| **UI (Streamlit)**                   | Visualización del documento, acciones sobre secciones, y revisión de propuestas de IA |
+Para considerar v0.1 completo:
 
-### **Flujo conceptual**
+1. Script funcional que cumple el criterio de éxito
+2. README con 3 ejemplos de uso
+3. 5 tests que validen el parseo y la detección de redundancias
 
-1. Usuario carga documento → se convierte en Objeto Markdown estructurado.
-2. Usuario navega, selecciona sección → solicita acción (humana o IA).
-3. IA analiza/propone → usuario revisa → si aprueba, se actualiza el objeto.
-4. Documento puede exportarse de nuevo a Markdown plano.
+Tiempo estimado: **1 semana**.
