@@ -20,3 +20,6 @@ where = ["citecrawl"]
 
 [tool.pytest.ini_options]
 pythonpath = "citecrawl"
+
+[tool.uv.workspace]
+members = ["nlp_analysis"]
