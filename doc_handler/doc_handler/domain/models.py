@@ -93,3 +93,46 @@ class Document(BaseModel):
                     collect(section.subsections)
         collect(self.sections)
         return titles
+
+
+class Redundancy(BaseModel):
+    """Represents a pair of redundant paragraphs.
+
+    Attributes:
+        paragraph1: First paragraph in the redundant pair
+        paragraph2: Second paragraph in the redundant pair
+        similarity_score: Cosine similarity score (0.0 - 1.0)
+    """
+    paragraph1: Paragraph
+    paragraph2: Paragraph
+    similarity_score: float = Field(ge=0.0, le=1.0)
+
+    @property
+    def similarity_percentage(self) -> int:
+        """Returns similarity as percentage (0-100)."""
+        return int(self.similarity_score * 100)
+
+
+class RedundancyReport(BaseModel):
+    """Report of redundancy analysis results.
+
+    Attributes:
+        section_title: Title of analyzed section (None for full document)
+        total_paragraphs: Total number of paragraphs analyzed
+        redundancies: List of detected redundant paragraph pairs
+        threshold: Similarity threshold used for detection (default 0.7)
+    """
+    section_title: str | None
+    total_paragraphs: int
+    redundancies: list[Redundancy] = Field(default_factory=list)
+    threshold: float = 0.7
+
+    @property
+    def has_redundancies(self) -> bool:
+        """Returns True if any redundancies were found."""
+        return len(self.redundancies) > 0
+
+    @property
+    def redundancy_count(self) -> int:
+        """Returns the number of redundant pairs found."""
+        return len(self.redundancies)
