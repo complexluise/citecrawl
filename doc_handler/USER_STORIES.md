@@ -152,11 +152,12 @@ Estas historias están fuera del alcance de v0.1:
 
 ## Resumen del Sprint
 
-| ID     | Título                              | Prioridad | Story Points | Estado  |
-|--------|-------------------------------------|-----------|--------------|---------|
-| US-001 | Parsear documento en árbol          | 🔴 ALTA   | 5            | Pending |
-| US-002 | Detectar redundancias               | 🔴 ALTA   | 8            | Pending |
-| US-003 | Aplicar cambios con aprobación      | 🟡 MEDIA  | 3            | Pending |
-| **Total** |                                  |           | **16**       |         |
+| ID     | Título                              | Prioridad | Story Points | Estado    |
+|--------|-------------------------------------|-----------|--------------|-----------|
+| US-001 | Parsear documento en árbol          | 🔴 ALTA   | 5            | ✅ Done   |
+| US-002A| Detectar redundancias en sección   | 🔴 ALTA   | 5            | ✅ Done   |
+| US-002B| Detectar redundancias en documento  | 🟡 MEDIA  | 3            | ✅ Done   |
+| US-003 | Aplicar cambios con aprobación      | 🟡 MEDIA  | 3            | Pending   |
+| **Total** |                                  |           | **16**       |           |
 
 **Velocidad estimada**: 16 puntos en 1 semana (sprint MVP)
