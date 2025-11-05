@@ -111,6 +111,56 @@ These features are deferred to future versions:
 - Linguistic analysis (future)
 - Section reordering (manual is fine)
 
+## Git Commit Convention
+
+All commits in this project must include co-authorship attribution:
+
+```bash
+git commit -m "$(cat <<'EOF'
+<type>(<scope>): <description>
+
+<detailed explanation if needed>
+
+Co-Authored-By: Lui Higuera <luise@unal.edu.co>
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+)"
+```
+
+### Commit Message Format
+
+- **type**: feat, fix, docs, style, refactor, test, chore
+- **scope**: Module name (embeddings, parser, cli, etc.)
+- **description**: Concise summary in imperative mood
+
+### Examples
+
+```bash
+git commit -m "$(cat <<'EOF'
+feat(embeddings): Implement intelligent batching to avoid token limit errors
+
+- Add estimate_tokens() function with conservative multilingual estimation
+- Split large document embeddings into batches of ~3000 tokens each
+- Fixes "Input text exceeds maximum length of 8194 tokens" error
+
+Co-Authored-By: Lui Higuera <luise@unal.edu.co>
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+)"
+```
+
+```bash
+git commit -m "$(cat <<'EOF'
+fix(parser): Handle empty paragraphs in section detection
+
+Co-Authored-By: Lui Higuera <luise@unal.edu.co>
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Important**: Always use HEREDOC syntax with `cat <<'EOF'` to preserve multi-line commit messages with proper attribution.
+
 ## Documentation
 
 - **[PRD.md](./PRD.md)**: Product requirements, problem statement, solution architecture

@@ -107,16 +107,16 @@
 
 ### Criterios de aceptación
 
-- [ ] Muestra diff lado a lado 
-- [ ] Pregunta confirmación: "¿Aplicar cambio? [s/N]" (default: No)
-- [ ] Solo actualiza el archivo si el usuario escribe explícitamente `s` o `S`
-- [ ] Preserva:
+- [x] Muestra diff lado a lado
+- [x] Pregunta confirmación: "¿Aplicar cambio? [s/N]" (default: No)
+- [x] Solo actualiza el archivo si el usuario escribe explícitamente `s` o `S`
+- [x] Preserva:
   - Formato original (espaciado, líneas vacías)
   - Codificación del archivo (UTF-8)
   - Estructura de headings no afectados
-- [ ] Backup automático antes de aplicar cambios: `archivo.md.backup`
-- [ ] Mensaje de éxito muestra ruta del backup: "✓ Cambios aplicados. Backup en archivo.md.backup"
-- [ ] Si el usuario rechaza, no modifica nada y muestra: "Cambios descartados"
+- [x] Backup automático antes de aplicar cambios: `archivo.md.backup`
+- [x] Mensaje de éxito muestra ruta del backup: "✓ Cambios aplicados. Backup en archivo.md.backup"
+- [x] Si el usuario rechaza, no modifica nada y muestra: "Cambios descartados"
 
 ### Prioridad
 🟡 **MEDIA** - Importante para UX, pero puede ser simple inicialmente
@@ -157,7 +157,7 @@ Estas historias están fuera del alcance de v0.1:
 | US-001 | Parsear documento en árbol          | 🔴 ALTA   | 5            | ✅ Done   |
 | US-002A| Detectar redundancias en sección   | 🔴 ALTA   | 5            | ✅ Done   |
 | US-002B| Detectar redundancias en documento  | 🟡 MEDIA  | 3            | ✅ Done   |
-| US-003 | Aplicar cambios con aprobación      | 🟡 MEDIA  | 3            | Pending   |
-| **Total** |                                  |           | **16**       |           |
+| US-003 | Aplicar cambios con aprobación      | 🟡 MEDIA  | 3            | ✅ Done   |
+| **Total** |                                  |           | **16**       | **COMPLETE** |
 
 **Velocidad estimada**: 16 puntos en 1 semana (sprint MVP)
