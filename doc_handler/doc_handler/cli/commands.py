@@ -1,5 +1,6 @@
 """CLI commands for doc_handler"""
 import click
+import json
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
@@ -11,6 +12,7 @@ from doc_handler.infrastructure.embedding_analyzer import EmbeddingAnalyzer
 from doc_handler.infrastructure.file_handler import (
     create_backup, show_diff, prompt_confirmation, apply_changes, remove_redundant_paragraph
 )
+from doc_handler.infrastructure.cache import DocumentCache
 
 
 console = Console()
@@ -26,13 +28,15 @@ def cli():
 @click.argument("file_path", type=click.Path(exists=True))
 @click.argument("section_title")
 @click.option("--threshold", default=0.7, type=float, help="Similarity threshold (0.0-1.0)")
-def check_redundancy_section(file_path: str, section_title: str, threshold: float):
+@click.option("--reparse", is_flag=True, help="Force re-parsing and re-generation of embeddings.")
+def check_redundancy_section(file_path: str, section_title: str, threshold: float, reparse: bool):
     """Detect redundancies in a specific section.
 
     FILE_PATH: Path to the Markdown file
     SECTION_TITLE: Exact title of the section to analyze
     """
     file_path_obj = Path(file_path)
+    cache = DocumentCache()
 
     # Header
     console.print(
@@ -43,12 +47,22 @@ def check_redundancy_section(file_path: str, section_title: str, threshold: floa
     )
 
     try:
-        # Parse document
-        with console.status("[bold green]Parseando documento..."):
-            content = file_path_obj.read_text(encoding='utf-8')
-            doc = parse_markdown(content, path=file_path_obj, generate_embeddings=True)
+        # Attempt to load from cache
+        doc = None
+        if not reparse:
+            with console.status("[bold cyan]Buscando en caché..."):
+                doc = cache.get(file_path_obj)
+            if doc:
+                console.print("[green]✓ Documento cargado desde la caché.[/green]")
 
-        console.print(f"[green]Documento parseado: {len(doc.sections)} secciones encontradas[/green]")
+        # If not cached or reparse is forced, parse the document
+        if doc is None:
+            console.print("[yellow]Generando embeddings... (esto puede tardar un momento)[/yellow]")
+            with console.status("[bold green]Parseando documento..."):
+                content = file_path_obj.read_text(encoding='utf-8')
+                doc = parse_markdown(content, path=file_path_obj, generate_embeddings=True)
+                cache.set(file_path_obj, doc)
+            console.print(f"[green]✓ Documento parseado y cacheado: {len(doc.sections)} secciones encontradas[/green]")
 
         # Find section
         try:
@@ -110,12 +124,14 @@ def check_redundancy_section(file_path: str, section_title: str, threshold: floa
 @cli.command()
 @click.argument("file_path", type=click.Path(exists=True))
 @click.option("--threshold", default=0.7, type=float, help="Similarity threshold (0.0-1.0)")
-def check_redundancy(file_path: str, threshold: float):
+@click.option("--reparse", is_flag=True, help="Force re-parsing and re-generation of embeddings.")
+def check_redundancy(file_path: str, threshold: float, reparse: bool):
     """Detect redundancies across entire document.
 
     FILE_PATH: Path to the Markdown file
     """
     file_path_obj = Path(file_path)
+    cache = DocumentCache()
 
     # Header
     console.print(
@@ -126,10 +142,21 @@ def check_redundancy(file_path: str, threshold: float):
     )
 
     try:
-        # Parse document
-        with console.status("[bold green]Parseando documento..."):
-            content = file_path_obj.read_text(encoding='utf-8')
-            doc = parse_markdown(content, path=file_path_obj, generate_embeddings=True)
+        # Attempt to load from cache
+        doc = None
+        if not reparse:
+            with console.status("[bold cyan]Buscando en caché..."):
+                doc = cache.get(file_path_obj)
+            if doc:
+                console.print("[green]✓ Documento cargado desde la caché.[/green]")
+
+        # If not cached or reparse is forced, parse the document
+        if doc is None:
+            console.print("[yellow]Generando embeddings... (esto puede tardar un momento)[/yellow]")
+            with console.status("[bold green]Parseando documento..."):
+                content = file_path_obj.read_text(encoding='utf-8')
+                doc = parse_markdown(content, path=file_path_obj, generate_embeddings=True)
+                cache.set(file_path_obj, doc)
 
         # Count total paragraphs
         def count_paragraphs(sections):
@@ -199,7 +226,8 @@ def check_redundancy(file_path: str, threshold: float):
 @click.argument("section_title")
 @click.option("--threshold", default=0.7, type=float, help="Similarity threshold (0.0-1.0)")
 @click.option("--interactive", is_flag=True, help="Interactively review each redundancy")
-def propose_fix(file_path: str, section_title: str, threshold: float, interactive: bool):
+@click.option("--reparse", is_flag=True, help="Force re-parsing and re-generation of embeddings.")
+def propose_fix(file_path: str, section_title: str, threshold: float, interactive: bool, reparse: bool):
     """Propose fixes for redundancies in a section with user approval.
 
     FILE_PATH: Path to the Markdown file
@@ -209,6 +237,7 @@ def propose_fix(file_path: str, section_title: str, threshold: float, interactiv
     asks for confirmation before making changes. Creates automatic backup.
     """
     file_path_obj = Path(file_path)
+    cache = DocumentCache()
 
     # Header
     console.print(
@@ -219,12 +248,24 @@ def propose_fix(file_path: str, section_title: str, threshold: float, interactiv
     )
 
     try:
-        # Parse document
-        with console.status("[bold green]Parseando documento..."):
-            content = file_path_obj.read_text(encoding='utf-8')
-            doc = parse_markdown(content, path=file_path_obj, generate_embeddings=True)
+        # Attempt to load from cache
+        doc = None
+        if not reparse:
+            with console.status("[bold cyan]Buscando en caché..."):
+                doc = cache.get(file_path_obj)
+            if doc:
+                console.print("[green]✓ Documento cargado desde la caché.[/green]")
 
-        console.print(f"[green]Documento parseado: {len(doc.sections)} secciones encontradas[/green]")
+        # If not cached or reparse is forced, parse the document
+        if doc is None:
+            console.print("[yellow]Generando embeddings... (esto puede tardar un momento)[/yellow]")
+            with console.status("[bold green]Parseando documento..."):
+                content = file_path_obj.read_text(encoding='utf-8')
+                doc = parse_markdown(content, path=file_path_obj, generate_embeddings=True)
+                cache.set(file_path_obj, doc)
+            console.print(f"[green]✓ Documento parseado y cacheado: {len(doc.sections)} secciones encontradas[/green]")
+        else:
+            content = file_path_obj.read_text(encoding='utf-8')
 
         # Find section
         try:
@@ -313,6 +354,49 @@ def propose_fix(file_path: str, section_title: str, threshold: float, interactiv
     except Exception as e:
         console.print(f"\n[bold red]Error: {str(e)}[/bold red]")
         raise
+
+
+@cli.command()
+@click.argument("file_path", type=click.Path(exists=True))
+def cache_info(file_path: str):
+    """Display cache information for a given file."""
+    file_path_obj = Path(file_path)
+    cache = DocumentCache()
+    cache_path = cache._get_cache_path(file_path_obj)
+
+    console.print(Panel.fit(f"Información de caché para {file_path_obj.name}", border_style="blue"))
+
+    if not cache_path.exists():
+        console.print("[yellow]No hay caché para este archivo.[/yellow]")
+        return
+
+    try:
+        with open(cache_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        table = Table(title="Metadatos de Caché")
+        table.add_column("Campo", style="cyan")
+        table.add_column("Valor", style="magenta")
+
+        table.add_row("Ruta del archivo", str(data.get('source_path')))
+        table.add_row("Fecha de modificación original", str(data.get('source_mtime')))
+        table.add_row("Fecha de cacheo", str(data.get('cached_at')))
+        table.add_row("Párrafos cacheados", str(len(data["document"]["sections"][0]["paragraphs"])))
+
+        console.print(table)
+
+    except (json.JSONDecodeError, KeyError):
+        console.print("[red]Error: El archivo de caché está corrupto.[/red]")
+
+
+@cli.command()
+@click.argument("file_path", type=click.Path(exists=True))
+def cache_clear(file_path: str):
+    """Clear the cache for a specific file."""
+    file_path_obj = Path(file_path)
+    cache = DocumentCache()
+    cache.clear(file_path_obj)
+    console.print(f"[green]✓ Caché para {file_path_obj.name} ha sido eliminada.[/green]")
 
 
 if __name__ == "__main__":

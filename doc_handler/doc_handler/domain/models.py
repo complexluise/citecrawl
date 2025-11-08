@@ -110,7 +110,7 @@ class Redundancy(BaseModel):
     @property
     def similarity_percentage(self) -> int:
         """Returns similarity as percentage (0-100)."""
-        return int(self.similarity_score * 100)
+        return round(self.similarity_score * 100)
 
 
 class RedundancyReport(BaseModel):

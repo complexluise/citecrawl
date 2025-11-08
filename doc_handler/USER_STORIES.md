@@ -209,5 +209,5 @@ Estas historias están fuera del alcance de v0.1:
 
 | ID     | Título                              | Prioridad | Story Points | Estado    |
 |--------|-------------------------------------|-----------|--------------|-----------|
-| US-004 | Caché automático de documentos      | 🟢 ALTA   | 5            | 🚧 In Progress |
-| **Total v0.2** |                             |           | **5**        | **WIP** |
+| US-004 | Caché automático de documentos      | 🟢 ALTA   | 5            | ✅ Done |
+| **Total v0.2** |                             |           | **5**        | **COMPLETE** |
