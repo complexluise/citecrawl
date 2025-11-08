@@ -59,15 +59,28 @@ Un script Python que:
 - Solo actualiza el archivo si el usuario acepta explícitamente
 - Preserva formato y espaciado del documento original
 
-## Qué NO es MVP
+## Roadmap de Versiones
 
-Estas cosas NO van en v0.1 (pueden esperar):
+### ✅ v0.1 (MVP) - COMPLETO
+- Parser de Markdown con embeddings
+- Detección de redundancias (sección y documento)
+- Aplicación de cambios con aprobación manual
+- Batching inteligente para API de embeddings
 
-- ❌ RAG o sugerencias de citas → v0.2
-- ❌ Generar transiciones entre secciones → v0.3
-- ❌ UI gráfica (Streamlit, web) → v0.4
-- ❌ Reordenar secciones (puedes hacerlo manualmente)
-- ❌ Análisis lingüístico complejo (coherencia, sentimiento)
+### 🚧 v0.2 - Performance & UX (EN PROGRESO)
+- **US-004**: Caché automático de documentos parseados
+  - Archivos JSON sidecar (`.doccache`)
+  - Validación por hash SHA256
+  - Invalidación automática al modificar archivo
+  - Comandos `--reparse`, `cache-clear`, `cache-info`
+  - Reduce tiempo de análisis de 10-30s a <100ms en ejecuciones subsecuentes
+
+### 🔮 Backlog futuro
+- ❌ RAG o sugerencias de citas → v0.3
+- ❌ Generar transiciones entre secciones → v0.4
+- ❌ UI gráfica (Streamlit, web) → v0.5
+- ❌ Reordenar secciones mediante CLI → Futuro
+- ❌ Análisis lingüístico complejo (coherencia, sentimiento) → Futuro
 
 ## Criterio de éxito
 

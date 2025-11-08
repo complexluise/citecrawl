@@ -132,25 +132,66 @@
 
 ---
 
-## Backlog (NO MVP)
+## US-004: Caché automático de documentos parseados
+
+**Como** usuario analizando documentos grandes múltiples veces
+**Quiero** que el sistema cachee el documento parseado con embeddings
+**Para** no esperar la generación de embeddings en cada ejecución
+
+### Criterios de aceptación
+
+- [x] Cache automático en primer análisis (sin comando manual)
+- [x] Archivos sidecar JSON (`documento.md.doccache`)
+- [x] Validación de cache: hash SHA256 + timestamp del archivo
+- [x] Mensajes claros: "Using cached analysis" vs "Generating embeddings"
+- [x] Flag `--reparse` para forzar regeneración
+- [x] Cache se invalida automáticamente al modificar archivo fuente
+- [x] Comando `cache-clear <file>` para limpiar cache manualmente
+- [x] Comando `cache-info <file>` para ver estado del cache
+- [x] Manejo robusto de errores:
+  - Cache corrupto → regenera silenciosamente
+  - Errores de permisos → continúa sin cache
+  - Cache faltante → genera normalmente
+- [x] Formato cache: JSON con metadata + documento serializado (Pydantic)
+- [x] Preserva embeddings completos en cache
+
+### Prioridad
+🟢 **ALTA** - Mejora crítica de performance para v0.2
+
+### Story Points
+**5** - Complejidad media, requiere serialización y validación
+
+### Definition of Done
+- Código implementado en `infrastructure/cache.py`
+- Tests unitarios cubren validación, serialización, invalidación
+- Integración en `parse_markdown()` transparente
+- Comandos CLI `cache-clear` y `cache-info` funcionales
+- Documentación en README con ejemplos de uso
+- TDD completo con plan documentado (TDD_PLAN_CACHE.md)
+
+---
+
+## Backlog (NO MVP v0.1)
 
 Estas historias están fuera del alcance de v0.1:
 
-### US-004: Sugerir citas desde corpus RAG
-**Prioridad**: Baja | **Versión**: v0.2
-
-### US-005: Generar transiciones entre secciones
+### US-005: Sugerir citas desde corpus RAG
 **Prioridad**: Baja | **Versión**: v0.3
 
-### US-006: Análisis lingüístico completo
+### US-006: Generar transiciones entre secciones
+**Prioridad**: Baja | **Versión**: v0.4
+
+### US-007: Análisis lingüístico completo
 **Prioridad**: Baja | **Versión**: Futuro
 
-### US-007: Reordenar secciones mediante CLI
+### US-008: Reordenar secciones mediante CLI
 **Prioridad**: Baja | **Versión**: Futuro
 
 ---
 
-## Resumen del Sprint
+## Resumen de Versiones
+
+### MVP v0.1 - COMPLETO ✅
 
 | ID     | Título                              | Prioridad | Story Points | Estado    |
 |--------|-------------------------------------|-----------|--------------|-----------|
@@ -158,6 +199,15 @@ Estas historias están fuera del alcance de v0.1:
 | US-002A| Detectar redundancias en sección   | 🔴 ALTA   | 5            | ✅ Done   |
 | US-002B| Detectar redundancias en documento  | 🟡 MEDIA  | 3            | ✅ Done   |
 | US-003 | Aplicar cambios con aprobación      | 🟡 MEDIA  | 3            | ✅ Done   |
-| **Total** |                                  |           | **16**       | **COMPLETE** |
+| **Total v0.1** |                             |           | **16**       | **COMPLETE** |
 
-**Velocidad estimada**: 16 puntos en 1 semana (sprint MVP)
+**Velocidad**: 16 puntos en 1 semana (sprint MVP)
+
+---
+
+### v0.2 - Performance & UX
+
+| ID     | Título                              | Prioridad | Story Points | Estado    |
+|--------|-------------------------------------|-----------|--------------|-----------|
+| US-004 | Caché automático de documentos      | 🟢 ALTA   | 5            | 🚧 In Progress |
+| **Total v0.2** |                             |           | **5**        | **WIP** |
