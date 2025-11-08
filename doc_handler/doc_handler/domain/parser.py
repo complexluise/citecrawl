@@ -41,15 +41,17 @@ def parse_markdown(content: str, path: Path | None = None, generate_embeddings: 
     def save_paragraph():
         nonlocal current_paragraph_lines, paragraph_start_line, paragraph_index
         if current_paragraph_lines and current_section is not None:
-            text = '\n'.join(current_paragraph_lines)
-            para = Paragraph(
-                text=text,
-                index=paragraph_index,
-                line_number=paragraph_start_line,
-                embedding=None
-            )
-            current_section.paragraphs.append(para)
-            paragraph_index += 1
+            text = '\n'.join(current_paragraph_lines).strip()
+            # Ignore if paragraph is empty or just looks like a heading marker
+            if text and not re.fullmatch(r'#{1,6}', text):
+                para = Paragraph(
+                    text=text,
+                    index=paragraph_index,
+                    line_number=paragraph_start_line,
+                    embedding=None
+                )
+                current_section.paragraphs.append(para)
+                paragraph_index += 1
             current_paragraph_lines = []
             paragraph_start_line = None
 
