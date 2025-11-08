@@ -6,13 +6,16 @@ from rich.table import Table
 from rich.panel import Panel
 from pathlib import Path
 
-from doc_handler.domain.parser import parse_markdown
 from doc_handler.domain.exceptions import SectionNotFoundError
+from doc_handler.domain.models import Document, Section
+from doc_handler.domain.parser import parse_markdown
+
+from doc_handler.infrastructure.cache import DocumentCache
 from doc_handler.infrastructure.embedding_analyzer import EmbeddingAnalyzer
 from doc_handler.infrastructure.file_handler import (
     create_backup, show_diff, prompt_confirmation, apply_changes, remove_redundant_paragraph
 )
-from doc_handler.infrastructure.cache import DocumentCache
+
 
 
 console = Console()
@@ -249,10 +252,10 @@ def propose_fix(file_path: str, section_title: str, threshold: float, interactiv
 
     try:
         # Attempt to load from cache
-        doc = None
+        doc: Document = None
         if not reparse:
             with console.status("[bold cyan]Buscando en caché..."):
-                doc = cache.get(file_path_obj)
+                doc: Document = cache.get(file_path_obj)
             if doc:
                 console.print("[green]✓ Documento cargado desde la caché.[/green]")
 
@@ -261,7 +264,7 @@ def propose_fix(file_path: str, section_title: str, threshold: float, interactiv
             console.print("[yellow]Generando embeddings... (esto puede tardar un momento)[/yellow]")
             with console.status("[bold green]Parseando documento..."):
                 content = file_path_obj.read_text(encoding='utf-8')
-                doc = parse_markdown(content, path=file_path_obj, generate_embeddings=True)
+                doc: Document = parse_markdown(content, path=file_path_obj, generate_embeddings=True)
                 cache.set(file_path_obj, doc)
             console.print(f"[green]✓ Documento parseado y cacheado: {len(doc.sections)} secciones encontradas[/green]")
         else:
@@ -269,7 +272,7 @@ def propose_fix(file_path: str, section_title: str, threshold: float, interactiv
 
         # Find section
         try:
-            section = doc.find_section(section_title)
+            section: Section = doc.find_section(section_title)
         except SectionNotFoundError as e:
             console.print(f"\n[bold red]Error: Sección \"{section_title}\" no encontrada[/bold red]\n")
             console.print("[bold]Secciones disponibles:[/bold]")
