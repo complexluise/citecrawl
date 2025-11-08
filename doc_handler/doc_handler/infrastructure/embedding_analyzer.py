@@ -11,8 +11,8 @@ def cosine_similarity(vec1: list[float] | None, vec2: list[float] | None) -> flo
         vec2: Second embedding vector
 
     Returns:
-        Cosine similarity score between -1.0 and 1.0
-        Returns 0.0 if either vector is None or zero vector
+        Cosine similarity score between -1.0 and 1.0.
+        Returns 0.0 if either vector is None or zero vector.
     """
     # Handle None embeddings
     if vec1 is None or vec2 is None:
@@ -30,7 +30,10 @@ def cosine_similarity(vec1: list[float] | None, vec2: list[float] | None) -> flo
         return 0.0
 
     # Calculate cosine similarity
-    return float(np.dot(a, b) / (norm_a * norm_b))
+    similarity = np.dot(a, b) / (norm_a * norm_b)
+
+    # Clip to handle floating point inaccuracies
+    return float(np.clip(similarity, -1.0, 1.0))
 
 
 class EmbeddingAnalyzer:

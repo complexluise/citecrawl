@@ -276,7 +276,80 @@ def apply_patch(document: Document, patch: Patch) -> None:
 
 ---
 
+### AD-009: Caché automático con JSON sidecar (v0.2)
+**Decisión**: El sistema cachea automáticamente documentos parseados con embeddings en archivos JSON sidecar.
+
+**Razón**: Performance crítica - generar embeddings para documentos grandes puede tomar 10-30 segundos. El caché reduce ejecuciones subsecuentes a <100ms.
+
+**Implementación**:
+```python
+# Cache format: documento.md.doccache
+{
+  "version": "0.1",
+  "source_file": "documento.md",
+  "file_hash": "sha256...",  # SHA256 del contenido
+  "last_modified": "2025-11-05T16:30:00Z",
+  "document": {
+    # Serialized Document model con embeddings (Pydantic .model_dump())
+  }
+}
+```
+
+**Invalidación**:
+- Hash SHA256 del archivo fuente no coincide
+- Archivo fuente modificado (mtime check)
+- Flag `--reparse` forzado por usuario
+
+**Ventajas**:
+- Transparente: Usuarios no necesitan comandos extra
+- Portable: Archivos JSON pueden moverse con el documento
+- Simple: No requiere base de datos
+- Visible: Usuarios ven archivos `.doccache`
+
+**Implicación**:
+- `parse_markdown()` verifica cache antes de generar embeddings
+- Todos los comandos CLI soportan `--reparse` flag
+- Comandos `cache-clear` y `cache-info` para gestión manual
+- Cache se guarda después de generación exitosa de embeddings
+
+---
+
 ## Capa de Infraestructura
+
+### CacheManager (infrastructure/cache.py)
+```python
+class CacheManager:
+    """Gestiona cache de documentos parseados con embeddings."""
+
+    def get_cached_document(self, source_path: Path) -> Document | None:
+        """
+        Retorna documento cacheado si válido, None si no existe/inválido.
+
+        Valida que:
+        - Archivo cache existe
+        - Hash SHA256 coincide
+        - Versión de cache es compatible
+        """
+        ...
+
+    def save_document_cache(self, source_path: Path, document: Document) -> None:
+        """
+        Guarda documento en cache JSON sidecar.
+
+        - Serializa Document con Pydantic .model_dump()
+        - Calcula hash SHA256 del source file
+        - Guarda en {source_path}.doccache
+        """
+        ...
+
+    def is_cache_valid(self, source_path: Path) -> bool:
+        """Verifica si cache es válido (sin cargar documento completo)"""
+        ...
+
+    def clear_cache(self, source_path: Path) -> bool:
+        """Elimina archivo cache. Retorna True si existía."""
+        ...
+```
 
 ### LLMClient (Protocol)
 ```python
