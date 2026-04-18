@@ -7,7 +7,7 @@ authors = [
 ]
 license = { text = "MIT" }
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.11"
 classifiers = [
     "Programming Language :: Python :: 3",
 ]
@@ -25,11 +25,12 @@ dependencies = [
     "bibtexparser==1.4.4",
 ]
 
-[tool.setuptools.packages.find]
-where = ["citecrawl"]
+[tool.setuptools]
+packages = ["citecrawl"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]
 
 [tool.uv.workspace]
 members = []
