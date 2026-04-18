@@ -1,8 +1,12 @@
 import streamlit as st
 import os
-from dotenv import load_dotenv
 
-load_dotenv()
+# Load .env locally (development), use st.secrets on Streamlit Cloud
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # dotenv not available on Streamlit Cloud
 
 st.set_page_config(
     page_title="CiteCrawl - AI Research Assistant",
