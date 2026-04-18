@@ -19,7 +19,7 @@ dependencies = [
 where = ["citecrawl"]
 
 [tool.pytest.ini_options]
-pythonpath = "citecrawl"
+testpaths = ["tests"]
 
 [tool.uv.workspace]
-members = ["nlp_analysis"]
+members = []

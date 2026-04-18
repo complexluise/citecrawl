@@ -18,13 +18,6 @@ class Bibliography(BaseModel):
     author: str = ""
     year: Optional[int] = None
 
-class EnrichedData(BaseModel):
-    """
-    Represents the data after enrichment by the AI.
-    """
-    summary: str
-    bibliography: Bibliography
-
 class Publication(BaseModel):
     """
     Represents a single citable publication with its metadata.

@@ -1,6 +1,9 @@
 import json
+import logging
 import google.generativeai as genai
 from citecrawl.models import CSVRow, ScrapedData
+
+log = logging.getLogger("rich")
 
 def enrich_content(scraped_data: ScrapedData, api_key: str) -> CSVRow:
     """
@@ -83,7 +86,5 @@ def enrich_content(scraped_data: ScrapedData, api_key: str) -> CSVRow:
         row.extracted = True
         return row
     except (json.JSONDecodeError, TypeError) as e:
-        # Handle cases where the model's output is not valid JSON
-        print(f"Error decoding JSON from model response: {e}")
-        # Return the original row to avoid crashing
+        log.error(f"Error decoding JSON from model response: {e}")
         return row
