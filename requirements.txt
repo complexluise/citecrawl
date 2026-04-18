@@ -8,4 +8,7 @@ google-generativeai
 pytest
 pytest-mock
 pytest-cov
- pydantic
+pydantic
+streamlit
+pandas
+openpyxl
