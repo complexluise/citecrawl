@@ -66,14 +66,8 @@ Un script Python que:
 - Detección de redundancias (sección y documento)
 - Aplicación de cambios con aprobación manual
 - Batching inteligente para API de embeddings
+- Cacha simple con json de archivos
 
-### 🚧 v0.2 - Performance & UX (EN PROGRESO)
-- **US-004**: Caché automático de documentos parseados
-  - Archivos JSON sidecar (`.doccache`)
-  - Validación por hash SHA256
-  - Invalidación automática al modificar archivo
-  - Comandos `--reparse`, `cache-clear`, `cache-info`
-  - Reduce tiempo de análisis de 10-30s a <100ms en ejecuciones subsecuentes
 
 ### 🔮 Backlog futuro
 - ❌ RAG o sugerencias de citas → v0.3

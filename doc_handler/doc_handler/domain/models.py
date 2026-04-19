@@ -68,6 +68,7 @@ class Document(BaseModel):
         """
         def search(sections: list[Section]) -> Section | None:
             for section in sections:
+                print(section.title)
                 if section.title == title:
                     return section
                 if section.subsections:

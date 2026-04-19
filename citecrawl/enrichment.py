@@ -56,7 +56,7 @@ def enrich_content(scraped_data: ScrapedData, api_key: str) -> CSVRow:
     try:
         enriched_json = json.loads(cleaned_response_text)
         
-        # Update only if the field is empty in the original row
+        # TODO: esta logica esta muy acoplada
         if not row.title:
             row.title = enriched_json.get("Título")
         if not row.authors:

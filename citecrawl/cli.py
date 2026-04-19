@@ -47,7 +47,8 @@ def sanitize_filename(url: str) -> str:
 @cli.command()
 @click.argument('csv_path', type=click.Path(exists=True))
 @click.option('--output', default='output', help='The directory to save the scraped content.')
-def extract(csv_path: str, output: str):
+@click.option('--no-enrichment', is_flag=True, default=False, help='Skip the content enrichment step.')
+def extract(csv_path: str, output: str, no_enrichment: bool):
     """
     Scrapes URLs from a CSV file, enriches the content, and saves the results.
     """
@@ -74,11 +75,12 @@ def extract(csv_path: str, output: str):
             scraped_data = scrape_url(row=row, api_key=firecrawl_api_key)
             
             if scraped_data and scraped_data.content:
-                # Enrich the content
-                row = enrich_content(
-                    scraped_data=scraped_data,
-                    api_key=gemini_api_key
-                )
+                if not no_enrichment:
+                    # Enrich the content
+                    row = enrich_content(
+                        scraped_data=scraped_data,
+                        api_key=gemini_api_key
+                    )
                 
                 # Save the content to a Markdown file
                 filename = sanitize_filename(row.url)

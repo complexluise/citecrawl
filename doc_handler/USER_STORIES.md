@@ -8,16 +8,16 @@
 
 ### Criterios de aceptación
 
-- [ ] Parsea correctamente `#`, `##`, `###`, `####`, `#####`, `######` como niveles jerárquicos (1-6)
-- [ ] Cada sección incluye: nivel, título, contenido, líneas de inicio/fin
-- [ ] Puedo referirme a secciones por título exacto (case-sensitive)
-- [ ] Si el título no existe, muestra error claro con sugerencias
-- [ ] El parser maneja correctamente:
+- [x] Parsea correctamente `#`, `##`, `###`, `####`, `#####`, `######` como niveles jerárquicos (1-6)
+- [x] Cada sección incluye: nivel, título, contenido, líneas de inicio/fin
+- [x] Puedo referirme a secciones por título exacto (case-sensitive)
+- [x] Si el título no existe, muestra error claro con sugerencias
+- [x] El parser maneja correctamente:
   - Headings con caracteres especiales
   - Bloques de código que contienen `#` (no deben parsearse como headings)
   - Listas que empiezan con `#`
-- [ ] El contenido de una sección incluye todo hasta el siguiente heading del mismo nivel o superior
-- [ ] Cada parrafo debe tener su embedding (usa jinaai y request para llamado directo api)
+- [x] El contenido de una sección incluye todo hasta el siguiente heading del mismo nivel o superior
+- [x] Cada parrafo debe tener su embedding (usa jinaai y request para llamado directo api)
 
 ### Prioridad
 🔴 **ALTA** - Bloqueante para todas las demás funcionalidades
@@ -42,15 +42,15 @@
 
 ### Criterios de aceptación
 
-- [ ] Comando: `check-redundancy-section <archivo.md> "<Título de sección>"`
-- [ ] Analiza **solo** la sección especificada (no todo el documento)
-- [ ] Considera como "párrafo" cualquier bloque de texto separado por línea vacía
-- [ ] Reporta pares de párrafos con similitud ≥70% (similaridad coseno embeddings)
-- [ ] Muestra resumen claro: "Párrafos X e Y son Z% similares"
-- [ ] Usa **embeddings de Jina AI** para análisis semántico
-- [ ] Si no hay redundancias, muestra mensaje positivo: "✓ No se encontraron redundancias"
-- [ ] Si la sección no existe, muestra error claro con sugerencias
-- [ ] Puede enviar contenido completo de la sección al LLM para análisis contextual
+- [x] Comando: `check-redundancy-section <archivo.md> "<Título de sección>"`
+- [x] Analiza **solo** la sección especificada (no todo el documento)
+- [x] Considera como "párrafo" cualquier bloque de texto separado por línea vacía
+- [x] Reporta pares de párrafos con similitud ≥70% (similaridad coseno embeddings)
+- [x] Muestra resumen claro: "Párrafos X e Y son Z% similares"
+- [x] Usa **embeddings de Jina AI** para análisis semántico
+- [x] Si no hay redundancias, muestra mensaje positivo: "✓ No se encontraron redundancias"
+- [x] Si la sección no existe, muestra error claro con sugerencias
+- [x] Puede enviar contenido completo de la sección al LLM para análisis contextual
 
 ### Prioridad
 🔴 **ALTA** - Funcionalidad core del MVP
@@ -74,15 +74,15 @@
 
 ### Criterios de aceptación
 
-- [ ] Comando: `check-redundancy <archivo.md>`
-- [ ] Analiza **todo el documento** usando únicamente embeddings (aquí vendría bien una matriz de similaridad, calcularla una vez y así disponer del analizis completo)
-- [ ] Considera como "párrafo" cualquier bloque de texto separado por línea vacía
-- [ ] Reporta pares de párrafos con similitud ≥70% (similaridad coseno embeddings)
-- [ ] Muestra resumen general y e información de los casos top.
-- [ ] **NO envía texto completo al LLM** (solo usa embeddings pre-calculados de US-001)
-- [ ] Si no hay redundancias, muestra mensaje positivo: "✓ No se encontraron redundancias globales"
-- [ ] Muestra estadísticas: total de párrafos analizados, pares redundantes encontrados
-- [ ] Optimizado para documentos grandes (usa embeddings cacheados)
+- [x] Comando: `check-redundancy <archivo.md>`
+- [x] Analiza **todo el documento** usando únicamente embeddings (aquí vendría bien una matriz de similaridad, calcularla una vez y así disponer del analizis completo)
+- [x] Considera como "párrafo" cualquier bloque de texto separado por línea vacía
+- [x] Reporta pares de párrafos con similitud ≥70% (similaridad coseno embeddings)
+- [x] Muestra resumen general y e información de los casos top.
+- [x] **NO envía texto completo al LLM** (solo usa embeddings pre-calculados de US-001)
+- [x] Si no hay redundancias, muestra mensaje positivo: "✓ No se encontraron redundancias globales"
+- [x] Muestra estadísticas: total de párrafos analizados, pares redundantes encontrados
+- [x] Optimizado para documentos grandes (usa embeddings cacheados)
 
 ### Prioridad
 🟡 **MEDIA** - Útil pero no crítico para MVP (la versión por sección es suficiente)
@@ -199,15 +199,6 @@ Estas historias están fuera del alcance de v0.1:
 | US-002A| Detectar redundancias en sección   | 🔴 ALTA   | 5            | ✅ Done   |
 | US-002B| Detectar redundancias en documento  | 🟡 MEDIA  | 3            | ✅ Done   |
 | US-003 | Aplicar cambios con aprobación      | 🟡 MEDIA  | 3            | ✅ Done   |
-| **Total v0.1** |                             |           | **16**       | **COMPLETE** |
-
-**Velocidad**: 16 puntos en 1 semana (sprint MVP)
-
----
-
-### v0.2 - Performance & UX
-
-| ID     | Título                              | Prioridad | Story Points | Estado    |
-|--------|-------------------------------------|-----------|--------------|-----------|
 | US-004 | Caché automático de documentos      | 🟢 ALTA   | 5            | ✅ Done |
-| **Total v0.2** |                             |           | **5**        | **COMPLETE** |
+| **Total v0.1** |                             |           | **21**       | **COMPLETE** |
+

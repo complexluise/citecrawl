@@ -12,7 +12,7 @@ def load_urls_from_csv(csv_path: str) -> list[CSVRow]:
     Returns:
         A list of CSVRow objects.
     """
-    with open(csv_path, mode='r', encoding='utf-8') as file:
+    with open(csv_path, mode='r', newline='', encoding='utf-8-sig') as file:
         reader = csv.DictReader(file)
         rows = []
         for i, row_data in enumerate(reader):
