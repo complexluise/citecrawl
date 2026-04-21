@@ -7,19 +7,30 @@ authors = [
 ]
 license = { text = "MIT" }
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.11"
 classifiers = [
     "Programming Language :: Python :: 3",
 ]
 dependencies = [
-    "coverage-badge>=1.1.2",
+    "click==8.3.2",
+    "pydantic==2.13.2",
+    "rich==15.0.0",
+    "python-dotenv==1.2.2",
+    "firecrawl-py==4.22.2",
+    "google-generativeai==0.8.6",
+    "streamlit==1.56.0",
+    "pandas==3.0.2",
+    "openpyxl==3.1.5",
+    "qrcode==8.2",
+    "bibtexparser==1.4.4",
 ]
 
-[tool.setuptools.packages.find]
-where = ["citecrawl"]
+[tool.setuptools]
+packages = ["citecrawl"]
 
 [tool.pytest.ini_options]
-pythonpath = "citecrawl"
+testpaths = ["tests"]
+pythonpath = ["."]
 
 [tool.uv.workspace]
-members = ["nlp_analysis"]
+members = []

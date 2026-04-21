@@ -1,6 +1,9 @@
+import logging
 from firecrawl import Firecrawl
 from citecrawl.models import ScrapedData, CSVRow
 import csv
+
+log = logging.getLogger("rich")
 
 def load_urls_from_csv(csv_path: str) -> list[CSVRow]:
     """
@@ -62,7 +65,5 @@ def scrape_url(row: CSVRow, api_key: str) -> ScrapedData:
             csv_row=row
         )
     except Exception as e:
-        # In case of an exception during the scrape, return an empty ScrapedData object
-        # to ensure the function is robust. A logging mechanism could be added here.
-        print(f"An error occurred while scraping {url}: {e}")
+        log.error(f"Error scraping {url}: {e}")
         return ScrapedData(url=url, csv_row=row)

@@ -1,29 +1,23 @@
 import click
-import pandas as pd
 import os
 import logging
-import sys
 import re
+import csv
+from urllib.parse import urlparse
 from rich.logging import RichHandler
 from rich.console import Console
-from urllib.parse import urlparse
+from dotenv import load_dotenv
 from citecrawl.extraction import scrape_url, load_urls_from_csv
 from citecrawl.enrichment import enrich_content
 from citecrawl.bibtex import generate_bibliography_file
-import csv
 from citecrawl.models import ScrapedData, Publication, CSVRow
-from dotenv import load_dotenv
-
-import sys
-from rich.console import Console
 
 # --- Logger Setup ---
-# Configure logging to use RichHandler for beautiful output
 logging.basicConfig(
     level="INFO",
     format="%(message)s",
     datefmt="[%X]",
-    handlers=[]
+    handlers=[RichHandler()]
 )
 log = logging.getLogger("rich")
 
@@ -142,19 +136,6 @@ def cite(csv_path: str, doc_id: str):
         f.write(bibtex_content)
 
     log.info(f"Bibliography generated at {bib_output_path}")
-
-    # If a Google Doc ID is provided, update the doc
-    if doc_id:
-        log.info("Updating citations in Google Doc...")
-        try:
-            # Dynamic import to avoid issues when bibtex2docs is not installed
-            from citecrawl.gdocs import update_google_doc
-            update_google_doc(doc_id, bibtex_content)
-            log.info("Google Doc update complete.")
-        except ImportError:
-            log.error("'bibtex2docs' is not installed. Please install it to use the Google Docs integration.")
-        except Exception as e:
-            log.error(f"Error updating Google Doc: {e}")
 
 if __name__ == '__main__':
     log = logging.getLogger("rich")
